@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive World Sphere</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { 
+    background: #070a12; 
+    color: #fff; 
+    font-family: 'Space Grotesk', monospace; 
+    overflow: hidden; 
+    cursor: default;
+  }
+  canvas { 
+    display: block; 
+    cursor: pointer; 
+    background: radial-gradient(circle at center, #0a0e18 0%, #070a12 100%);
+  }
+  .info-panel {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.2);
+    max-width: 300px;
+  }
+  .info-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: rgba(255,255,255,0.9);
+  }
+  .info-text {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.4;
+  }
+  .binary-display {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.15);
+    font-family: monospace;
+    min-height: 60px;
+  }
+  .binary-title {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .binary-stream {
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.9);
+    letter-spacing: 0.2em;
+    text-shadow: 0 0 10px rgba(255,255,255,0.3);
+  }
+</style>
+</head>
+<body>
+
+<div class="info-panel">
+  <div class="info-title">Interactive World Constellation</div>
+  <div class="info-text">
+    Click on individual countries to activate binary streams. Connected nations form data pathways across the globe.
+    <br><br>
+    Drag to rotate • Scroll to zoom
+  </div>
+</div>
+
+<div class="binary-display">
+  <div class="binary-title">Data Stream</div>
+  <div class="binary-stream" id="binaryStream">Waiting for activation...</div>
+</div>
+
+<canvas id="worldCanvas"></canvas>
+
+<script>
+// Canvas setup
+const canvas = document.getElementById('worldCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// World sphere properties
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 2;
+const radius = Math.min(canvas.width, canvas.height) * 0.3;
+
+// Rotation and interaction
+let rotationX = 0;
+let rotationY = 0;
+let mouseX = 0;
+let mouseY = 0;
+let isDragging = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
+let zoom = 1;
+
+// Animation time
+let time = 0;
+
+// Individual country outlines (simplified but recognizable)
+const countryOutlines = {
+  "United States": [
+    [49, -125], [49, -67], [45, -67], [32, -80], [25, -80], [25, -97], [30, -97], [35, -106], 
+    [42, -117], [49, -125]
+  ],
+  "Canada": [
+    [83, -75], [75, -141], [60, -141], [60, -95], [49, -95], [49, -125], [60, -125], 
+    [70, -105], [75, -85], [83, -75]
+  ],
+  "United Kingdom": [
+    [59, -8], [59, 2], [51, 2], [50, -5], [55, -8], [59, -8]
+  ],
+  "Germany": [
+    [55, 6], [55, 15], [47, 15], [47, 6], [55, 6]
+  ],
+  "France": [
+    [51, -5], [51, 8], [42, 8], [42, -2], [46, -5], [51, -5]
+  ],
+  "Australia": [
+    [-10, 113], [-10, 154], [-44, 154], [-44, 113], [-10, 113]
+  ],
+  "Italy": [
+    [47, 7], [47, 19], [37, 19], [37, 7], [47, 7]
+  ],
+  "Sweden": [
+    [69, 11], [69, 24], [55, 24], [55, 11], [69, 11]
+  ],
+  "Japan": [
+    [46, 130], [46, 146], [30, 146], [30, 130], [46, 130]
+  ],
+  "India": [
+    [35, 68], [35, 97], [8, 97], [8, 68], [35, 68]
+  ],
+  "Brazil": [
+    [5, -74], [5, -35], [-34, -35], [-34, -74], [5, -74]
+  ],
+  "South Africa": [
+    [-22, 16], [-22, 33], [-35, 33], [-35, 16], [-22, 16]
+  ]
+};
+
+// Countries data with click regions
+const countries = [
+  { name: "United States", lat: 39.8283, lng: -98.5795, active: false, pulse: 0, binaryStream: "" },
+  { name: "Canada", lat: 56.1304, lng: -106.3468, active: false, pulse: 0, binaryStream: "" },
+  { name: "United Kingdom", lat: 55.3781, lng: -3.4360, active: false, pulse: 0, binaryStream: "" },
+  { name: "Germany", lat: 51.1657, lng: 10.4515, active: false, pulse: 0, binaryStream: "" },
+  { name: "France", lat: 46.2276, lng: 2.2137, active: false, pulse: 0, binaryStream: "" },
+  { name: "Australia", lat: -25.2744, lng: 133.7751, active: false, pulse: 0, binaryStream: "" },
+  { name: "Italy", lat: 41.8719, lng: 12.5674, active: false, pulse: 0, binaryStream: "" },
+  { name: "Sweden", lat: 60.1282, lng: 18.6435, active: false, pulse: 0, binaryStream: "" },
+  { name: "Japan", lat: 36.2048, lng: 138.2529, active: false, pulse: 0, binaryStream: "" },
+  { name: "India", lat: 20.5937, lng: 78.9629, active: false, pulse: 0, binaryStream: "" },
+  { name: "Brazil", lat: -14.2350, lng: -51.9253, active: false, pulse: 0, binaryStream: "" },
+  { name: "South Africa", lat: -30.5595, lng: 22.9375, active: false, pulse: 0, binaryStream: "" }
+];
+
+// Convert lat/lng to 3D coordinates
+function latLngTo3D(lat, lng, radius) {
+  const phi = (lat * Math.PI) / 180;
+  const theta = ((lng + 180) * Math.PI) / 180;
+  
+  const x = radius * Math.cos(phi) * Math.cos(theta);
+  const y = radius * Math.sin(phi);
+  const z = radius * Math.cos(phi) * Math.sin(theta);
+  
+  return { x, y, z };
+}
+
+// Project 3D to 2D
+function project3D(point3d, rotX, rotY, zoom) {
+  // Rotate around Y axis
+  let x = point3d.x * Math.cos(rotY) - point3d.z * Math.sin(rotY);
+  let z = point3d.x * Math.sin(rotY) + point3d.z * Math.cos(rotY);
+  let y = point3d.y;
+  
+  // Rotate around X axis
+  const newY = y * Math.cos(rotX) - z * Math.sin(rotX);
+  z = y * Math.sin(rotX) + z * Math.cos(rotX);
+  y = newY;
+  
+  // Apply zoom and perspective projection
+  const perspective = 1000;
+  const scale = (perspective / (perspective + z)) * zoom;
+  
+  return {
+    x: centerX + x * scale,
+    y: centerY - y * scale,
+    z: z,
+    scale: scale,
+    visible: z > -radius * 0.8
+  };
+}
+
+// Generate binary stream
+function generateBinaryStream(length = 8) {
+  return Array.from({length}, () => Math.random() > 0.5 ? '1' : '0').join(' ');
+}
+
+// Update binary display
+function updateBinaryDisplay() {
+  const activeCountries = countries.filter(c => c.active);
+  const binaryElement = document.getElementById('binaryStream');
+  
+  if (activeCountries.length === 0) {
+    binaryElement.textContent = 'Waiting for activation...';
+    binaryElement.style.color = 'rgba(255,255,255,0.5)';
+  } else {
+    const streams = activeCountries.map(c => c.binaryStream).join(' | ');
+    binaryElement.textContent = streams;
+    binaryElement.style.color = 'rgba(140,200,255,0.9)';
+  }
+}
+
+// Mouse and touch events
+canvas.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  lastMouseX = e.clientX;
+  lastMouseY = e.clientY;
+});
+
+canvas.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  
+  if (isDragging) {
+    const deltaX = e.clientX - lastMouseX;
+    const deltaY = e.clientY - lastMouseY;
+    
+    rotationY += deltaX * 0.01;
+    rotationX += deltaY * 0.01;
+    
+    rotationX = Math.max(-Math.PI/2, Math.min(Math.PI/2, rotationX));
+    
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+  }
+});
+
+// Point-in-polygon test for continent clicking
+function pointInPolygon(point, polygon) {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    if (((polygon[i].y > point.y) !== (polygon[j].y > point.y)) &&
+        (point.x < (polygon[j].x - polygon[i].x) * (point.y - polygon[i].y) / (polygon[j].y - polygon[i].y) + polygon[i].x)) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+canvas.addEventListener('mouseup', (e) => {
+  if (!isDragging) {
+    let clickHandled = false;
+    
+    // Check for country shape clicks
+    countries.forEach((country, index) => {
+      if (clickHandled) return;
+      
+      const outline = countryOutlines[country.name];
+      if (!outline) return;
+      
+      const projectedPoints = outline.map(([lat, lng]) => {
+        const pos3d = latLngTo3D(lat, lng, radius);
+        return project3D(pos3d, rotationX, rotationY, zoom);
+      }).filter(p => p.visible);
+      
+      if (projectedPoints.length > 2) {
+        const clickPoint = { x: e.clientX, y: e.clientY };
+        
+        if (pointInPolygon(clickPoint, projectedPoints)) {
+          country.active = !country.active;
+          country.pulse = country.active ? 1.0 : 0;
+          country.binaryStream = country.active ? generateBinaryStream(6) : "";
+          updateBinaryDisplay();
+          clickHandled = true;
+        }
+      }
+    });
+  }
+  isDragging = false;
+});
+
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  zoom *= (1 - e.deltaY * 0.001);
+  zoom = Math.max(0.5, Math.min(2.0, zoom));
+});
+
+// Resize handler
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+// Main animation loop
+function animate() {
+  ctx.fillStyle = 'rgba(7,10,18,0.05)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // Auto rotation when not dragging
+  if (!isDragging) {
+    rotationY += 0.003;
+  }
+  
+  // Update country pulses and binary streams
+  countries.forEach(country => {
+    if (country.active) {
+      country.pulse *= 0.95;
+      if (country.pulse < 0.1) {
+        country.pulse = 0.8;
+        country.binaryStream = generateBinaryStream(6);
+        updateBinaryDisplay();
+      }
+    }
+  });
+  
+  // Draw connections first (behind countries)
+  ctx.strokeStyle = 'rgba(140,180,255,0.2)';
+  ctx.lineWidth = 1;
+  
+  countries.forEach((country, i) => {
+    const pos3d_i = latLngTo3D(country.lat, country.lng, radius);
+    const pos2d_i = project3D(pos3d_i, rotationX, rotationY, zoom);
+    
+    if (!pos2d_i.visible) return;
+    
+    country.connections.forEach(connIndex => {
+      if (connIndex < countries.length) {
+        const connCountry = countries[connIndex];
+        const pos3d_j = latLngTo3D(connCountry.lat, connCountry.lng, radius);
+        const pos2d_j = project3D(pos3d_j, rotationX, rotationY, zoom);
+        
+        if (pos2d_j.visible) {
+          const alpha = Math.min(pos2d_i.scale, pos2d_j.scale) * 0.5;
+          const activeBoost = (country.active || connCountry.active) ? 3 : 1;
+          
+          ctx.strokeStyle = `rgba(140,180,255,${alpha * activeBoost * 0.3})`;
+          ctx.lineWidth = (country.active || connCountry.active) ? 2 : 1;
+          
+          ctx.beginPath();
+          ctx.moveTo(pos2d_i.x, pos2d_i.y);
+          ctx.lineTo(pos2d_j.x, pos2d_j.y);
+          ctx.stroke();
+        }
+      }
+    });
+  });
+  
+  // Draw individual countries
+  countries.forEach((country, index) => {
+    const outline = countryOutlines[country.name];
+    if (!outline) return;
+    
+    const maxPulse = country.pulse;
+    const isActive = country.active;
+    
+    // Project outline points
+    const projectedPoints = outline.map(([lat, lng]) => {
+      const pos3d = latLngTo3D(lat, lng, radius);
+      return project3D(pos3d, rotationX, rotationY, zoom);
+    }).filter(p => p.visible);
+    
+    if (projectedPoints.length < 3) return; // Not enough points visible
+    
+    // Draw country fill with glow effect for active countries
+    if (isActive) {
+      // Create glow effect around country
+      const centerPos3d = latLngTo3D(country.lat, country.lng, radius);
+      const centerPos2d = project3D(centerPos3d, rotationX, rotationY, zoom);
+      
+      if (centerPos2d.visible) {
+        const glowRadius = 50 * centerPos2d.scale * zoom * (1 + maxPulse);
+        const glowGradient = ctx.createRadialGradient(
+          centerPos2d.x, centerPos2d.y, glowRadius * 0.2,
+          centerPos2d.x, centerPos2d.y, glowRadius
+        );
+        glowGradient.addColorStop(0, `rgba(140,200,255,${0.4 * maxPulse})`);
+        glowGradient.addColorStop(0.7, `rgba(140,200,255,${0.1 * maxPulse})`);
+        glowGradient.addColorStop(1, 'rgba(140,200,255,0)');
+        
+        ctx.fillStyle = glowGradient;
+        ctx.beginPath();
+        ctx.arc(centerPos2d.x, centerPos2d.y, glowRadius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    
+    // Draw country outline
+    ctx.strokeStyle = isActive 
+      ? `rgba(140,200,255,${0.9 + maxPulse * 0.4})` 
+      : 'rgba(180,200,255,0.5)';
+    ctx.lineWidth = isActive ? 2 + maxPulse * 3 : 1.5;
+    
+    ctx.beginPath();
+    projectedPoints.forEach((p, i) => {
+      if (i === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    });
+    ctx.closePath();
+    ctx.stroke();
+    
+    // Fill country with subtle color
+    const fillAlpha = isActive ? 0.4 + maxPulse * 0.3 : 0.15;
+    ctx.fillStyle = isActive 
+      ? `rgba(140,200,255,${fillAlpha})` 
+      : `rgba(120,140,180,${fillAlpha})`;
+    ctx.fill();
+    
+    // Binary digits for active countries (positioned at country center)
+    if (isActive && country.binaryStream) {
+      const centerPos3d = latLngTo3D(country.lat, country.lng, radius);
+      const centerPos2d = project3D(centerPos3d, rotationX, rotationY, zoom);
+      
+      if (centerPos2d.visible) {
+        const fontSize = Math.max(14, 20 * centerPos2d.scale * zoom);
+        ctx.font = `${fontSize}px 'Space Grotesk', monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = `rgba(255,255,255,${0.9 * centerPos2d.scale})`;
+        ctx.fillText(
+          country.binaryStream, 
+          centerPos2d.x, 
+          centerPos2d.y - 30 * centerPos2d.scale
+        );
+      }
+    }
+    
+    // Country name for active countries
+    if (isActive) {
+      const centerPos3d = latLngTo3D(country.lat, country.lng, radius);
+      const centerPos2d = project3D(centerPos3d, rotationX, rotationY, zoom);
+      
+      if (centerPos2d.visible) {
+        const fontSize = Math.max(12, 16 * centerPos2d.scale * zoom);
+        ctx.font = `${fontSize}px 'Space Grotesk', sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = `rgba(255,255,255,${0.8 * centerPos2d.scale})`;
+        ctx.fillText(
+          country.name, 
+          centerPos2d.x, 
+          centerPos2d.y + 25 * centerPos2d.scale
+        );
+      }
+    }
+  });
+  
+  // Draw sphere wireframe
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  
+  // Latitude lines
+  for (let lat = -80; lat <= 80; lat += 20) {
+    ctx.beginPath();
+    for (let lng = -180; lng <= 180; lng += 5) {
+      const pos3d = latLngTo3D(lat, lng, radius);
+      const pos2d = project3D(pos3d, rotationX, rotationY, zoom);
+      
+      if (lng === -180) {
+        ctx.moveTo(pos2d.x, pos2d.y);
+      } else {
+        ctx.lineTo(pos2d.x, pos2d.y);
+      }
+    }
+    ctx.stroke();
+  }
+  
+  // Longitude lines
+  for (let lng = -180; lng <= 160; lng += 20) {
+    ctx.beginPath();
+    for (let lat = -90; lat <= 90; lat += 5) {
+      const pos3d = latLngTo3D(lat, lng, radius);
+      const pos2d = project3D(pos3d, rotationX, rotationY, zoom);
+      
+      if (lat === -90) {
+        ctx.moveTo(pos2d.x, pos2d.y);
+      } else {
+        ctx.lineTo(pos2d.x, pos2d.y);
+      }
+    }
+    ctx.stroke();
+  }
+  
+  time++;
+  requestAnimationFrame(animate);
+}
+
+// Start animation
+animate();
+</script>
+
+</body>
+</html>

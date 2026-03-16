@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apply — AstroStat School Rome 2026</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/nav.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+
+  <style>
+    .apply-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 6rem 2rem 4rem;
+    }
+    .apply-page-inner {
+      width: 100%;
+      max-width: 600px;
+    }
+    .apply-page h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.92);
+      letter-spacing: -0.03em;
+      text-align: center;
+    }
+    .apply-page h1::after {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 3px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.3), rgba(180,140,255,0.4));
+      border-radius: 2px;
+      margin: 0.8rem auto 0;
+      opacity: 0.5;
+    }
+    .apply-page .subtitle {
+      font-size: 0.92rem;
+      color: rgba(255, 255, 255, 0.45);
+      margin-top: 0.8rem;
+      line-height: 1.6;
+      text-align: center;
+    }
+    .apply-footer-info {
+      margin-top: 3rem;
+      text-align: center;
+    }
+    .apply-footer-info .footer-contact { justify-content: center; }
+    .apply-footer-meta {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.2);
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="site-nav visible dark-mode" id="siteNav">
+  <div class="nav-brand">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50 4 L56 40 L92 50 L56 60 L50 96 L44 60 L8 50 L44 40 Z" fill="#fff" opacity="0.8"/>
+    </svg>
+    AstroStat School
+  </div>
+  <a href="index.html" class="nav-apply">&#8592; Back to site</a>
+</nav>
+
+<main class="apply-page">
+  <div class="apply-page-inner">
+
+    <h1>Ready to Decode<br>the Universe?</h1>
+    <p class="subtitle">One week that will transform the way you think about data.<br>7th Edition &middot; Rome &middot; 27&ndash;31 July 2026</p>
+
+    <form class="apply-form" onsubmit="event.preventDefault();">
+      <div class="form-row">
+        <div class="form-group"><label for="firstName">First Name</label><input type="text" id="firstName" placeholder="Your first name" required></div>
+        <div class="form-group"><label for="lastName">Last Name</label><input type="text" id="lastName" placeholder="Your last name" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label for="email">Email</label><input type="email" id="email" placeholder="your@email.com" required></div>
+        <div class="form-group"><label for="institution">Institution</label><input type="text" id="institution" placeholder="University / Institute"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="level">Academic Level</label>
+          <select id="level">
+            <option value="" disabled selected>Select your level</option>
+            <option>MSc Student</option>
+            <option>PhD Candidate</option>
+            <option>Postdoc</option>
+            <option>Faculty / Researcher</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label for="country">Country</label><input type="text" id="country" placeholder="Your country"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full">
+          <label for="motivation">Motivation</label>
+          <textarea id="motivation" placeholder="Briefly describe your research interests and why you want to attend..."></textarea>
+        </div>
+      </div>
+      <button type="submit" class="btn-submit">Submit Application</button>
+    </form>
+
+    <div class="apply-footer-info">
+      <div class="footer-contact">
+        <a href="mailto:astrostat2025@physics.uoc.gr">astrostat2025@physics.uoc.gr</a>
+        <span>&middot;</span>
+        <span style="font-size:0.8rem;color:rgba(255,255,255,0.3)">Dr. K. Kovlakas &middot; Dr. C. Casadio &middot; Prof. A. Zezas</span>
+      </div>
+      <div class="apply-footer-meta">AstroStatistics School &copy; 2026. Founded 2019.</div>
+    </div>
+
+  </div>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AstroStat School — Rome 2026</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/hero.css">
+  <link rel="stylesheet" href="assets/css/nav.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+</head>
+<body>
+
+<a href="#main-content" class="sr-only">Skip to content</a>
+<canvas id="c" aria-hidden="true"></canvas>
+<div class="white-flash" id="whiteFlash"></div>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="site-nav" id="siteNav">
+  <div class="nav-brand">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50 4 L56 40 L92 50 L56 60 L50 96 L44 60 L8 50 L44 40 Z" fill="#0a0e18" opacity="0.8"/>
+    </svg>
+    AstroStat School
+  </div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#topics">Topics</a></li>
+    <li><a href="#instructors">Instructors</a></li>
+    <li><a href="#venue">Venue</a></li>
+    <li><a href="#legacy">Legacy</a></li>
+    <li><a href="#sponsors">Sponsors</a></li>
+  </ul>
+  <a href="apply.html" class="nav-apply">Apply Now</a>
+</nav>
+
+<!-- ===== SIDE DOTS ===== -->
+<div class="side-dots" id="sideDots"></div>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="main-content" role="main">
+  <div class="hero-logo" aria-label="AstroStatistics Academy logo">
+    <img src="assets/images/school_logo/school_logo_white.png" alt="AstroStatistics School logo">
+  </div>
+  <p class="hero-overline">AstroStat School</p>
+  <p class="edition-info">7th Edition &middot; Rome &middot; 27–31 July 2026</p>
+  <h1 class="headline">
+    <span class="word">Fear.</span>
+    <span class="word">No.</span>
+    <span class="word">Statistics.</span>
+  </h1>
+  <!-- <p class="tagline">From Uncertainty to Confidence</p> -->
+  <p class="tagline">P(Fear|School)=0</p>
+  <div class="cta-row">
+    <a href="#content" class="btn-primary" id="exploreBtn" role="button">Discover & Apply</a>
+  </div>
+  <div class="meta" aria-label="Key statistics">
+    <div class="meta-label" style="align-self:center;font-size:0.75rem;color:rgba(255,255,255,0.4);margin-right:1rem">The stats<br>so far</div>
+    <div class="meta-item"><div class="meta-value">7</div><div class="meta-label">Editions</div></div>
+    <div class="meta-item"><div class="meta-value">500+</div><div class="meta-label">Applicants</div></div>
+    <div class="meta-item"><div class="meta-value">180+</div><div class="meta-label">Attendants</div></div>
+    <div class="meta-item"><div class="meta-value">40+</div><div class="meta-label">Countries</div></div>
+  </div>
+  <div class="hero-sponsors">
+    <img src="assets/images/sponsors/logo_w_text_lowres.png" alt="School logo">
+    <img src="assets/images/sponsors/logo UniversiData_ver_white_full.png" alt="UniversiData logo">
+  </div>
+</section>
+
+<!-- ===== ALL SCROLLABLE CONTENT ===== -->
+<div class="content-section" id="content">
+
+  <!-- ABOUT -->
+  <section class="sec snap-sec" id="about">
+    <div class="sec-inner">
+      <div class="sec-header reveal">
+        <h2>Fear. No. Statistics.</h2>
+        <p>Since 2019, we have been helping practitioners navigate the perilous waters of statistics and Machine Learning.</p>
+      </div>
+      <div class="about-grid reveal">
+        <div class="about-text">
+          <p>Are you an astronomer seeking to advance your research by delving deeper into statistics beyond the basics? Do you possess some familiarity with Machine Learning but are looking to demystify the intricacies of this "black box"?</p>
+          <p style="margin-top:1rem">The Summer School for Astrostatistics suits the needs of those who intend to "bridge the gap", and elevate their level from novice to mid-advanced. Each topic includes an introductory part along with hands-on analysis of astronomical data.</p>
+          <iframe src="assets/level-bar.html" scrolling="no" frameborder="0"
+                  style="width:100%;height:240px;display:block;margin:1.5rem 0;border:none;overflow:hidden"></iframe>
+        </div>
+        <div class="about-sidebar">
+          <div class="info-card"><h4>Where</h4><p>Rome, Italy</p></div>
+          <div class="info-card"><h4>When</h4><p>27—31 June 2026</p></div>
+          <div class="info-card"><h4>Edition</h4><p>7th Edition</p></div>
+        </div>
+      </div>
+      <div style="background:#f0f4f8;border-top:3px solid #d4d9e2;border-radius:0 0 10px 10px;padding:0.8rem 1.3rem;margin-top:0.5rem;font-size:0.9rem;line-height:1.45;color:rgba(10,14,24,0.5)"><span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:rgba(10,14,24,0.35);display:block;margin-bottom:0.3rem">Technical Requirements</span>Due to its nature as a hands-on workshop, this event requires on-site attendance — we do not provide an option for remote participation. The school is based on the Python programming language. Therefore, it is expected that applicants possess the basic knowledge necessary to read and understand the code. The attendees will need to bring their personal computers.</div>
+    </div>
+  </section>
+
+  <!-- TOPICS -->
+  <section class="sec sec-alt snap-sec" id="topics">
+    <div class="sec-inner">
+      <div class="sec-header reveal">
+        <h2>Topics</h2>
+        <p>Five days of intensive, hands-on sessions covering the essential toolkit for data-driven astrophysics.</p>
+      </div>
+      <div class="topics-grid reveal">
+        <div class="topic-chip"><h3>Classical &amp; Bayesian Statistics</h3><p>Foundational frameworks for hypothesis testing, parameter estimation, and inference.</p></div>
+        <div class="topic-chip"><h3>AI Agents</h3><p>Autonomous systems that plan, reason, and act — and how to harness them responsibly for scientific workflows.</p></div>
+        <div class="topic-chip"><h3>Deep Learning</h3><p>Neural network architectures for image recognition, signal classification, and generative modeling.</p></div>
+        <div class="topic-chip"><h3>Gaussian Processes</h3><p>Non-parametric regression for modeling uncertainty in time-series, light curves, and spectral data.</p></div>
+        <div class="topic-chip"><h3>Markov Chain Monte Carlo</h3><p>Sampling techniques for exploring complex posterior distributions in multi-parameter models.</p></div>
+        <div class="topic-chip"><h3>Simulation Based Inference</h3><p>Likelihood-free methods that leverage simulations to perform inference on intractable models.</p></div>
+        <div class="topic-chip"><h3>Machine Learning Practices</h3><p>Best practices for feature engineering, model validation, cross-validation, and reproducible pipelines.</p></div>
+        <div class="topic-chip"><h3>Clustering, Classification &amp; Regression</h3><p>Unsupervised and supervised methods for discovering structure and extracting information from complex astronomical datasets.</p></div>
+        <div class="topic-chip"><h3>GPU Parallelization</h3><p>Accelerating computations with GPU programming for large-scale data analysis and simulations.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTRUCTORS -->
+  <section class="sec snap-sec" id="instructors">
+    <div class="sec-inner">
+      <div class="sec-header reveal">
+        <h2>Teaching Body</h2>
+        <p>Researchers and practitioners at the intersection of astrophysics, statistics, and machine learning.</p>
+      </div>
+      <div class="instructors-label reveal">Instructors</div>
+      <div class="instructors-grid reveal">
+        <div class="instructor-card">
+          <div class="instructor-avatar">PB</div>
+          <h3>Dr. Paolo Bonfini</h3>
+          <div class="inst">Alma Sistemi</div>
+          <div class="role">Leading Research Engineer. Expert in machine learning applied to astronomy, bioinformatics, and software optimization.</div>
+        </div>
+        <div class="instructor-card">
+          <div class="instructor-avatar">MK</div>
+          <h3>Dr. Maria Koutoulaki</h3>
+          <div class="inst">University of Leeds</div>
+          <div class="role">Researcher in star formation. Expert in near-IR spectroscopy and interferometry of young stellar objects.</div>
+        </div>
+        <div class="instructor-card">
+          <div class="instructor-avatar">GM</div>
+          <h3>Dr. Grigoris Maravelias</h3>
+          <div class="inst">PeriAstron &amp; FORTH</div>
+          <div class="role">Researcher in massive stars. Uses machine-learning techniques to solve astrophysical problems.</div>
+        </div>
+        <div class="instructor-card">
+          <div class="instructor-avatar">AT</div>
+          <h3>Andreas Tersenov</h3>
+          <div class="inst">FORTH &amp; CEA Paris-Saclay</div>
+          <div class="role">PhD candidate in weak lensing cosmology. Deep neural networks for cosmology.</div>
+        </div>
+        <div class="instructor-card">
+          <div class="instructor-avatar">GV</div>
+          <h3>Giorgos Vernardos</h3>
+          <div class="inst">Lehman College, CUNY &amp; AMNH</div>
+          <div class="role">Ass. Professor. Data intensive problems in gravitational lensing, bayesian statistics, ML, and GPUs.</div>
+        </div>
+      </div>
+      <div class="instructors-label reveal" style="margin-top:3rem">Teaching Assistants</div>
+      <div class="ta-grid reveal">
+        <div class="ta-card"><div class="ta-avatar">CD</div><div class="ta-info"><h4>Charalampos Daoutis</h4><p>PhD Candidate &middot; Inst. of Astrophysics, FORTH</p></div></div>
+        <div class="ta-card"><div class="ta-avatar">AK</div><div class="ta-info"><h4>Avinash Kumar</h4><p>PhD Candidate &middot; Inst. of Astrophysics, FORTH</p></div></div>
+        <div class="ta-card"><div class="ta-avatar">AL</div><div class="ta-info"><h4>Arnab Lahiry</h4><p>PhD Candidate &middot; Inst. of Astrophysics, FORTH</p></div></div>
+      </div>
+      <p class="reveal" style="text-align:center;font-size:0.85rem;color:rgba(10,14,24,0.4);margin-top:2rem;font-style:italic">
+        Have you attended previous editions? Would you like to be a TA?
+        <a href="#apply-section" style="color:#2a1c5a;font-weight:600;text-decoration:none">Contact us!</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- VENUE -->
+  <section class="sec sec-alt snap-sec" id="venue">
+    <div class="sec-inner">
+      <div class="sec-header reveal">
+        <h2>Venue</h2>
+        <p>For the first time, the school moves to Rome &mdash; hosted at DotCampus in the heart of San Giovanni.</p>
+      </div>
+      <div class="venue-grid reveal">
+        <div class="venue-info">
+          <h3>DotCampus</h3>
+          <p>A modern campus ecosystem for learning, working, and living. Located in Rome's vibrant San Giovanni district, DotCampus offers conference rooms, coworking spaces, and all the infrastructure needed for an intensive hands-on school.</p>
+          <div class="venue-features">
+            <span class="venue-tag">Conference Rooms</span>
+            <span class="venue-tag">High-Speed WiFi</span>
+            <span class="venue-tag">Coworking Areas</span>
+            <span class="venue-tag">Rooftop Restaurant</span>
+            <span class="venue-tag">Fitness Center</span>
+          </div>
+          <h3>Accommodation</h3>
+          <p>DotCampus offers on-site student rooms at competitive rates, so you can fully immerse in the school experience. The San Giovanni area also has many options via booking platforms.</p>
+          <h3>Getting There</h3>
+          <p>Short walk from San Giovanni metro (Line A). Easy connections to Termini station and both Rome airports (Fiumicino &amp; Ciampino).</p>
+        </div>
+        <div class="venue-right">
+          <div class="venue-map">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2970.5!2d12.5145!3d41.8855!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x132f61b5e1c5cfab%3A0x4e9f8c6e3e2b1a5d!2sVia%20Faleria%2C%2021%2C%2000183%20Roma%20RM%2C%20Italy!5e0!3m2!1sen!2sus!4v1709000000000" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+          <div class="venue-gallery">
+            <div class="venue-gallery-item">Photo 1</div>
+            <div class="venue-gallery-item">Photo 2</div>
+            <div class="venue-gallery-item">Photo 3</div>
+            <div class="venue-gallery-item">Photo 4</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REGISTRATION -->
+  <section class="sec snap-sec" id="registration">
+    <div class="sec-inner">
+      <div class="sec-header reveal"><h2>Registration</h2></div>
+      <div class="reg-box reveal">
+        <p>Due to the hands-on format, the number of seats is limited.</p>
+        <p>This year, a small registration fee applies to cover catering and on-site meals during the school week.</p>
+        <div class="reg-fee">Registration Fee: TBA</div>
+        <p class="reg-fee-note">The fee is kept minimal and only covers food &amp; catering costs.</p>
+        <p>Full registration details for the 2026 Rome edition will be announced soon.</p>
+        <a href="apply.html" class="btn-dark">Apply Now</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEGACY -->
+  <section class="sec sec-alt snap-sec" id="legacy">
+    <div class="sec-inner">
+      <div class="sec-header reveal">
+        <h2>Legacy</h2>
+        <p>From a small workshop in Crete to an internationally recognized school. Six editions, five countries, one mission.</p>
+      </div>
+      <div class="legacy-grid reveal">
+        <div class="legacy-text">
+          <p>The AstroStatistics School was founded in 2019 by Jeff Andrews, Paolo Bonfini, Konstantinos Kovlakas, and Grigoris Maravelias at the University of Crete. What began as a grassroots initiative to bridge the gap between astronomy and modern statistical methods has grown into a sought-after international program.</p>
+          <p style="margin-top:1rem">Over five editions, the school has trained researchers from 21+ countries and 55+ institutes, building a growing community of data-literate astrophysicists. The 2026 Rome edition marks the school's first move beyond Crete, opening a new chapter under the DotCampus ecosystem.</p>
+
+          <div class="stats-row reveal" id="statsRow">
+            <div class="stat-item"><div class="stat-number" data-target="120">0</div><div class="stat-label">Students Trained</div></div>
+            <div class="stat-item"><div class="stat-number" data-target="55">0</div><div class="stat-label">Institutes</div></div>
+            <div class="stat-item"><div class="stat-number" data-target="21">0</div><div class="stat-label">Countries</div></div>
+            <div class="stat-item"><div class="stat-number" data-target="6">0</div><div class="stat-label">Editions</div></div>
+          </div>
+
+          <div class="material-link">
+            <div class="mat-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+              </svg>
+            </div>
+            <div class="mat-text">
+              <h4>Course Material</h4>
+              <p>All Jupyter notebooks are open source on <a href="https://github.com/astrostatistics-in-crete" target="_blank">GitHub</a></p>
+            </div>
+          </div>
+        </div>
+        <div class="legacy-timeline">
+          <div class="legacy-item">
+            <div class="year"><a href="https://astro.physics.uoc.gr/Conferences/Astrostatistics_School_Crete_2025" target="_blank">2025</a></div>
+            <div class="desc">5th Edition &middot; University of Crete, Heraklion &middot; 16&ndash;20 June<br>30 participants from 18 countries</div>
+          </div>
+          <div class="legacy-item">
+            <div class="year"><a href="https://astro.physics.uoc.gr/Conferences/Astrostatistics_School_Crete_2024" target="_blank">2024</a></div>
+            <div class="desc">4th Edition &middot; University of Crete, Heraklion &middot; 8&ndash;12 July<br>Expanded curriculum with GPU computing track</div>
+          </div>
+          <div class="legacy-item">
+            <div class="year"><a href="https://astro.physics.uoc.gr/Conferences/Astrostatistics_School_Crete_2023" target="_blank">2023</a></div>
+            <div class="desc">3rd Edition &middot; University of Crete, Heraklion &middot; 19&ndash;23 June<br>Introduction of Simulation Based Inference module</div>
+          </div>
+          <div class="legacy-item">
+            <div class="year"><a href="https://astro.physics.uoc.gr/Conferences/Astrostatistics_School_Crete_2022" target="_blank">2022</a></div>
+            <div class="desc">2nd Edition &middot; University of Crete, Heraklion &middot; 11&ndash;15 July<br>Post-pandemic return with full in-person format</div>
+          </div>
+          <div class="legacy-item">
+            <div class="year"><a href="https://astro.physics.uoc.gr/Conferences/Astrostatistics_School_Crete_2019" target="_blank">2019</a></div>
+            <div class="desc">1st Edition &middot; University of Crete, Heraklion &middot; 18&ndash;21 June<br>The founding edition that started it all</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPONSORS -->
+  <section class="sec snap-sec" id="sponsors">
+    <div class="sec-inner sec-wide">
+      <div class="sec-header reveal">
+        <h2>Partners &amp; Sponsors</h2>
+        <p>The organizations that make this school possible.</p>
+      </div>
+      <div class="sponsors-grid reveal">
+        <div class="sponsor-card">
+          <div class="sponsor-logo">UD</div>
+          <div class="sponsor-name">UniversiData</div>
+          <div class="sponsor-type">Organizing Partner</div>
+          <div class="sponsor-desc">EdTech company with a strong AI core. Part of Ingenium Group, powering education through technology.</div>
+        </div>
+        <div class="sponsor-card">
+          <div class="sponsor-logo">DC</div>
+          <div class="sponsor-name">DotCampus</div>
+          <div class="sponsor-type">Venue Partner</div>
+          <div class="sponsor-desc">Modern campus ecosystem in Rome offering accommodation, coworking, and event spaces.</div>
+        </div>
+
+        <div class="sponsor-card">
+          <div class="sponsor-logo">PA</div>
+          <div class="sponsor-name">PeriAstron</div>
+          <div class="sponsor-type">Research Partner</div>
+          <div class="sponsor-desc">Research initiative focused on massive stars, X-ray binaries, and machine learning in astrophysics.</div>
+        </div>
+        <div class="sponsor-card">
+          <div class="sponsor-logo">TT</div>
+          <div class="sponsor-name">Titan</div>
+          <div class="sponsor-type">Technology Partner</div>
+          <div class="sponsor-desc">High-performance computing infrastructure enabling GPU-accelerated scientific computations.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- APPLY FOOTER -->
+  <section class="sec snap-sec apply-footer" id="apply-section">
+    <div class="sec-inner">
+      <h2>Ready to Decode<br>the Universe?</h2>
+      <p class="subtitle">One week that will transform the way you think about data.</p>
+      <a href="apply.html" class="btn-submit" style="display:inline-block;width:auto;padding:1rem 3rem;margin-top:2.5rem;text-decoration:none;border-radius:10px">Apply Now &#8594;</a>
+
+      <div class="footer-contact" style="margin-top:3rem">
+        <a href="mailto:astrostat2025@physics.uoc.gr">astrostat2025@physics.uoc.gr</a>
+        <span>&middot;</span>
+        <span style="font-size:0.8rem;color:rgba(255,255,255,0.3)">Dr. K. Kovlakas &middot; Dr. C. Casadio &middot; Prof. A. Zezas</span>
+      </div>
+      <div class="footer-meta">AstroStatistics School &copy; 2026. Founded 2019.</div>
+    </div>
+  </section>
+
+</div><!-- end content-section -->
+
+<script src="assets/js/canvas.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

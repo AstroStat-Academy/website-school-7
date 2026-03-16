@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Knowledge Level</title>
+  <style>
+    body {
+      background: #4a4a4a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      position: relative;
+      width: 620px;
+      padding: 100px 20px 60px;
+    }
+
+    /* ── Arrow annotations ── */
+    .annotation {
+      position: absolute;
+      text-align: center;
+      font-weight: 900;
+      font-size: 13px;
+      text-transform: uppercase;
+      line-height: 1.3;
+      letter-spacing: 0.5px;
+    }
+
+    .annotation-start {
+      color: #e8a040;
+      left: 95px;
+      top: 0;
+      width: 160px;
+      opacity: 0;
+    }
+
+    .annotation-end {
+      color: #e84040;
+      right: 40px;
+      top: 0;
+      width: 160px;
+      opacity: 0;
+    }
+
+    /* ── Progress bar ── */
+    .bar-wrapper {
+      position: relative;
+      height: 72px;
+    }
+
+    .bar-track {
+      display: flex;
+      gap: 4px;
+      height: 72px;
+    }
+
+    .segment {
+      flex: 1;
+      border-radius: 2px;
+      transform: scaleY(0);
+      transform-origin: bottom;
+    }
+
+    /* Labels */
+    .labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 12px;
+    }
+
+    .label {
+      color: #ddd;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    @keyframes riseIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    .annotation .arrow {
+      display: block;
+      font-size: 36px;
+      margin-top: 4px;
+      animation: bounce 0.6s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(6px); }
+    }
+
+    @keyframes popUp {
+      0%   { transform: scaleY(0); }
+      60%  { transform: scaleY(1.15); }
+      100% { transform: scaleY(1); }
+    }
+
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Text annotations -->
+  <div class="annotation annotation-start">You are somewhere<br>here<span class="arrow">▼</span></div>
+  <div class="annotation annotation-end">You want to get<br>here<span class="arrow" style="animation-delay:0.2s">▼</span></div>
+
+
+  <!-- Bar -->
+  <div class="bar-wrapper">
+    <div class="bar-track" id="bar"></div>
+  </div>
+
+  <!-- Labels -->
+  <div class="labels">
+    <div class="label" style="text-align:left">Beginner</div>
+    <div class="label">Novice</div>
+    <div class="label">Professional</div>
+    <div class="label" style="text-align:right">Teacher</div>
+  </div>
+</div>
+
+<script>
+  const bar = document.getElementById('bar');
+  const TOTAL = 24;
+
+  // Color stops: yellow → orange → salmon → red
+  function segmentColor(i) {
+    const t = i / (TOTAL - 1);
+    const stops = [
+      { t: 0,    r: 245, g: 208, b:  96 },
+      { t: 0.35, r: 232, g: 112, b:  48 },
+      { t: 0.65, r: 232, g:  80, b:  80 },
+      { t: 1,    r: 192, g:  32, b:  32 },
+    ];
+    let lo = stops[0], hi = stops[stops.length - 1];
+    for (let k = 0; k < stops.length - 1; k++) {
+      if (t >= stops[k].t && t <= stops[k+1].t) { lo = stops[k]; hi = stops[k+1]; break; }
+    }
+    const f = (t - lo.t) / (hi.t - lo.t);
+    const r = Math.round(lo.r + f * (hi.r - lo.r));
+    const g = Math.round(lo.g + f * (hi.g - lo.g));
+    const b = Math.round(lo.b + f * (hi.b - lo.b));
+    return `rgb(${r},${g},${b})`;
+  }
+
+  function segmentHeight(i) {
+    const boundaries = [0, 6, 12, 18, 23];
+    const dist = Math.min(...boundaries.map(b => Math.abs(i - b)));
+    if (dist === 0) return 72;
+    if (dist === 1) return 62;
+    return 50 + Math.random() * 10 | 0;
+  }
+
+  // Build segments once
+  const segments = [];
+  for (let i = 0; i < TOTAL; i++) {
+    const seg = document.createElement('div');
+    seg.className = 'segment';
+    seg.style.backgroundColor = segmentColor(i);
+    seg.style.height = segmentHeight(i) + 'px';
+    seg.style.alignSelf = 'flex-end';
+    bar.appendChild(seg);
+    segments.push(seg);
+  }
+
+  const labels      = Array.from(document.querySelectorAll('.label'));
+  const annoStart   = document.querySelector('.annotation-start');
+  const annoEnd     = document.querySelector('.annotation-end');
+  // Segment animations end at: 0.03 + 39*0.04 + 0.4 ≈ 2.0s
+  // Last annotation done at: 2.4 + 0.6 = 3.0s
+  // Pause before restart: 1.5s  →  total cycle = 4.5s
+  const CYCLE_MS = 7000;
+
+  function resetAnim(el, anim) {
+    el.style.animation = 'none';
+    el.offsetHeight;           // force reflow
+    el.style.animation = anim;
+  }
+
+  function play() {
+    // Segments
+    segments.forEach((seg, i) => {
+      const delay = 0.03 + i * 0.04;
+      resetAnim(seg, `popUp 0.4s cubic-bezier(0.34,1.56,0.64,1) ${delay}s forwards`);
+    });
+
+    // Labels
+    labels.forEach((lbl, i) => {
+      resetAnim(lbl, `riseIn 0.5s ease ${0.1 + i * 0.1}s forwards`);
+    });
+
+    // Annotations + arrows
+    resetAnim(annoStart,  'fadeIn 0.6s ease 1.8s forwards');
+    resetAnim(annoEnd,    'fadeIn 0.6s ease 2.4s forwards');
+
+    setTimeout(play, CYCLE_MS);
+  }
+
+  play();
+</script>
+</body>
+</html>
