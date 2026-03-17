@@ -1,0 +1,369 @@
+// Canvas setup
+const canvas = document.getElementById('worldCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// World sphere properties
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 2;
+const radius = Math.min(canvas.width, canvas.height) * 0.3;
+
+// Animation speeds - adjust these for different effects
+const AUTO_ROTATION_SPEED = 0.001; // Higher = faster automatic rotation when not dragging
+const COUNTRY_BLINK_SPEED = 0.02;  // Higher = faster pulsation/blinking of countries
+
+// Get colors from CSS custom properties
+const BLINK_FILL_COLOR = getComputedStyle(canvas).getPropertyValue('--blink-fill-color').trim();
+const BLINK_STROKE_COLOR = getComputedStyle(canvas).getPropertyValue('--blink-stroke-color').trim();
+
+// Get city dot properties from CSS
+const CITY_DOT_COLOR = getComputedStyle(canvas).getPropertyValue('--city-dot-color').trim();
+const CITY_DOT_SIZE = parseInt(getComputedStyle(canvas).getPropertyValue('--city-dot-size').trim());
+const CITY_DOT_STROKE_COLOR = getComputedStyle(canvas).getPropertyValue('--city-dot-stroke-color').trim();
+const CITY_DOT_STROKE_WIDTH = parseFloat(getComputedStyle(canvas).getPropertyValue('--city-dot-stroke-width').trim());
+const BEACON_WAVE_COLOR = getComputedStyle(canvas).getPropertyValue('--beacon-wave-color').trim();
+const BEACON_WAVE_SPEED = parseFloat(getComputedStyle(canvas).getPropertyValue('--beacon-wave-speed').trim());
+const BEACON_INTERVAL = parseInt(getComputedStyle(canvas).getPropertyValue('--beacon-interval').trim());
+
+// Helper function to convert hex color to rgba
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// Draw city dots
+function drawCityDots() {
+  cityLocations.forEach((city, idx) => {
+    const pos3d = latLngTo3D(city.lat, city.lng, radius);
+    const pos2d = project3D(pos3d, rotationX, rotationY, zoom);
+    if (pos2d.visible) {
+      // Draw beacon waves (concentric expanding/fading circles)
+      // Each city gets a phase offset for async beacons
+      const phaseOffset = idx * 37; // Arbitrary prime multiplier for variety
+      const t = blinkTime + phaseOffset;
+      // Number of waves to show at once (e.g. 2)
+      const numWaves = 2;
+      for (let w = 0; w < numWaves; w++) {
+        // Each wave starts BEACON_INTERVAL frames apart
+        const waveAge = (t - w * BEACON_INTERVAL) % (numWaves * BEACON_INTERVAL);
+        if (waveAge >= 0 && waveAge < BEACON_INTERVAL) {
+          const progress = waveAge / BEACON_INTERVAL; // 0 to 1
+          const maxRadius = CITY_DOT_SIZE * 10;
+          const r = CITY_DOT_SIZE + progress * (maxRadius - CITY_DOT_SIZE);
+          const alpha = 0.3 * (1 - progress); // Fade out as it expands
+          ctx.beginPath();
+          ctx.arc(pos2d.x, pos2d.y, r, 0, Math.PI * 2);
+          ctx.strokeStyle = hexToRgba(BEACON_WAVE_COLOR, alpha);
+          ctx.lineWidth = 2 + 2 * (1 - progress); // Thicker at start
+          ctx.stroke();
+        }
+      }
+      // Draw the city dot itself
+      ctx.beginPath();
+      ctx.arc(pos2d.x, pos2d.y, CITY_DOT_SIZE, 0, Math.PI * 2);
+      ctx.fillStyle = CITY_DOT_COLOR;
+      ctx.fill();
+      ctx.strokeStyle = CITY_DOT_STROKE_COLOR;
+      ctx.lineWidth = CITY_DOT_STROKE_WIDTH;
+      ctx.stroke();
+      // Draw city name just above the beacon dot
+      ctx.font = '11px "Space Grotesk", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.strokeStyle = CITY_DOT_STROKE_COLOR;
+      ctx.lineWidth = CITY_DOT_STROKE_WIDTH;
+      ctx.strokeText(city.name, pos2d.x, pos2d.y - CITY_DOT_SIZE - 3);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(city.name, pos2d.x, pos2d.y - CITY_DOT_SIZE - 3);
+    }
+  });
+}
+
+// Rotation and interaction
+let rotationX = 0.35; // Tilt up 20 degrees to show Iceland latitude (~64°N)
+let rotationY = -1.8; // Center on Iceland longitude (~22°W)
+let isDragging = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
+let zoom = 1;
+
+// World data
+let worldData = null;
+let blinkingCountries = new Set(countriesList); // Use countries from countries.js
+let blinkTime = 0;
+let nextBlinkCountry = 0;
+
+// Load world topology data
+d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(data => {
+  worldData = topojson.feature(data, data.objects.countries);
+}).catch(err => {
+  // Fallback to basic sphere
+  animate();
+});
+
+// Convert lat/lng to 3D coordinates
+function latLngTo3D(lat, lng, radius) {
+  const phi = (lat * Math.PI) / 180;
+  const theta = (lng * Math.PI) / 180;
+
+  const x = -radius * Math.cos(phi) * Math.cos(theta);
+  const y = radius * Math.sin(phi);
+  const z = radius * Math.cos(phi) * Math.sin(theta);
+
+  return { x, y, z };
+}
+
+// Project 3D to 2D
+function project3D(point3d, rotX, rotY, zoom) {
+  // Rotate around Y axis
+  let x = point3d.x * Math.cos(rotY) - point3d.z * Math.sin(rotY);
+  let z = point3d.x * Math.sin(rotY) + point3d.z * Math.cos(rotY);
+  let y = point3d.y;
+
+  // Rotate around X axis
+  const newY = y * Math.cos(rotX) - z * Math.sin(rotX);
+  z = y * Math.sin(rotX) + z * Math.cos(rotX);
+  y = newY;
+
+  // Apply zoom and perspective projection
+  const scale = zoom;
+
+  return {
+    x: centerX + x * scale,
+    y: centerY - y * scale,
+    z: z,
+    scale: scale,
+    visible: z > -radius * 0.8
+  };
+}
+
+// Mouse events
+canvas.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  lastMouseX = e.clientX;
+  lastMouseY = e.clientY;
+});
+
+canvas.addEventListener('mousemove', (e) => {
+  if (isDragging) {
+    const deltaX = e.clientX - lastMouseX;
+    const deltaY = e.clientY - lastMouseY;
+
+    rotationY += deltaX * 0.01;
+    rotationX += deltaY * 0.01;
+
+    rotationX = Math.max(-Math.PI/2, Math.min(Math.PI/2, rotationX));
+
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+  }
+});
+
+canvas.addEventListener('mouseup', (e) => {
+  isDragging = false;
+});
+
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  zoom *= (1 - e.deltaY * 0.001);
+  zoom = Math.max(0.5, Math.min(2.0, zoom));
+});
+
+// Resize handler
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+// Draw country geometry
+function drawCountry(geometry, properties) {
+  const countryName = properties?.NAME || properties?.name || properties?.NAME_EN || '';
+
+  // Check if this country should be blinking with flexible matching
+  let isBlinking = false;
+  for (const blinkCountry of blinkingCountries) {
+    if (countryMatches(countryName, blinkCountry)) {
+      isBlinking = true;
+      break;
+    }
+  }
+
+  if (geometry.type === 'Polygon') {
+    drawPolygon(geometry.coordinates, isBlinking, countryName);
+  } else if (geometry.type === 'MultiPolygon') {
+    geometry.coordinates.forEach(polygon => {
+      drawPolygon(polygon, isBlinking, countryName);
+    });
+  }
+}
+
+// Country name matching function
+function countryMatches(geoName, listName) {
+  if (!geoName || !listName) return false;
+
+  const geo = geoName.toLowerCase().trim();
+  const list = listName.toLowerCase().trim();
+
+  // Direct match
+  if (geo === list) {
+    return true;
+  }
+
+  // Handle common variations
+  if (list === 'usa' && (geo.includes('united states') || geo.includes('america'))) {
+    return true;
+  }
+  if (list === 'italy' && geo.includes('italy')) {
+    return true;
+  }
+  if (list === 'greece' && geo.includes('greece')) {
+    return true;
+  }
+  if (list === 'china' && geo.includes('china')) {
+    return true;
+  }
+  if (list === 'uk' && geo.includes('united kingdom')) {
+    return true;
+  }
+
+  // General partial matching
+  return geo.includes(list) || list.includes(geo);
+}
+
+function drawPolygon(coordinates, isBlinking = false, countryName = '') {
+  coordinates.forEach((ring, ringIndex) => {
+    ctx.beginPath();
+    let first = true;
+
+    ring.forEach(([lng, lat]) => {
+      const pos3d = latLngTo3D(lat, lng, radius);
+      const pos2d = project3D(pos3d, rotationX, rotationY, zoom);
+
+      if (pos2d.visible) {
+        if (first) {
+          ctx.moveTo(pos2d.x, pos2d.y);
+          first = false;
+        } else {
+          ctx.lineTo(pos2d.x, pos2d.y);
+        }
+      } else {
+        first = true;
+      }
+    });
+
+    if (!first) {
+      if (ringIndex === 0) {
+        // Outer ring - fill and stroke
+        if (isBlinking) {
+          // Generate random offset based on country name for unique pulsing
+          let countryOffset = 0;
+          for (let i = 0; i < (countryName || '').length; i++) {
+            countryOffset += (countryName || '').charCodeAt(i);
+          }
+          countryOffset = (countryOffset * 0.1) % (Math.PI * 2); // Convert to 0-2π range
+
+          // PULSATING YELLOW effect using sine wave with unique offset
+          const blinkIntensity = (Math.sin(blinkTime * COUNTRY_BLINK_SPEED + countryOffset) + 1) * 0.5; // 0 to 1
+          const alpha = 0.1 + blinkIntensity * 0.4;
+          ctx.fillStyle = hexToRgba(BLINK_FILL_COLOR, alpha);
+          ctx.fill();
+          ctx.strokeStyle = hexToRgba(BLINK_STROKE_COLOR, 0.3 + blinkIntensity * 0.4);
+          ctx.lineWidth = 1 + blinkIntensity * 1;
+          ctx.stroke();
+        } else {
+          // Normal appearance
+          ctx.fillStyle = 'rgba(160,180,200,0.12)';
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(220,240,255,0.7)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      } else {
+        // Inner ring (holes) - just stroke
+        ctx.strokeStyle = isBlinking ? 'rgba(255,255,255,0.6)' : 'rgba(220,240,255,0.4)';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  });
+}
+
+// Main animation loop
+function animate() {
+  ctx.fillStyle = 'rgba(7,10,18,0.1)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Auto rotation when not dragging
+  if (!isDragging) {
+    rotationY += AUTO_ROTATION_SPEED;
+  }
+
+  // Increment blink time for blinking animation
+  blinkTime++;
+
+  // Draw sphere wireframe grid
+  ctx.strokeStyle = 'rgba(180,200,255,0.15)';
+  ctx.lineWidth = 0.8;
+
+  // Latitude lines
+  for (let lat = -80; lat <= 80; lat += 20) {
+    ctx.beginPath();
+    let first = true;
+    for (let lng = -180; lng <= 180; lng += 5) {
+      const pos3d = latLngTo3D(lat, lng, radius);
+      const pos2d = project3D(pos3d, rotationX, rotationY, zoom);
+
+      if (pos2d.z > -radius * 0.8) {
+        if (first) {
+          ctx.moveTo(pos2d.x, pos2d.y);
+          first = false;
+        } else {
+          ctx.lineTo(pos2d.x, pos2d.y);
+        }
+      } else {
+        first = true;
+      }
+    }
+    ctx.stroke();
+  }
+
+  // Longitude lines
+  for (let lng = -180; lng <= 160; lng += 20) {
+    ctx.beginPath();
+    let first = true;
+    for (let lat = -90; lat <= 90; lat += 5) {
+      const pos3d = latLngTo3D(lat, lng, radius);
+      const pos2d = project3D(pos3d, rotationX, rotationY, zoom);
+
+      if (pos2d.z > -radius * 0.8) {
+        if (first) {
+          ctx.moveTo(pos2d.x, pos2d.y);
+          first = false;
+        } else {
+          ctx.lineTo(pos2d.x, pos2d.y);
+        }
+      } else {
+        first = true;
+      }
+    }
+    ctx.stroke();
+  }
+
+  // Draw world countries if data is loaded
+  if (worldData) {
+    worldData.features.forEach(feature => {
+      drawCountry(feature.geometry, feature.properties);
+    });
+  }
+
+  // Draw city dots
+  drawCityDots();
+
+  requestAnimationFrame(animate);
+}
+
+// Start animation
+animate();

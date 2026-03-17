@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive World Sphere</title>
+<style>
+  body { margin: 0; padding: 0; background: transparent; }
+</style>
+<link rel="stylesheet" href="./worldsphere.css">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson@3"></script>
+<script src="../../assets/js/data/countries.js"></script>
+<script src="../../assets/js/data/locations.js"></script>
+</head>
+<body>
+
+<canvas id="worldCanvas"
+  style="
+    --blink-fill-color: #cfca66;
+    --blink-stroke-color: #acb55d;
+    --city-dot-color: #cf564b;
+    --city-dot-size: 6;
+    --city-dot-stroke-color: #5a0a0a;
+    --city-dot-stroke-width: 1.5;
+    --beacon-wave-color: #b04c43;
+    --beacon-wave-speed: 0.8;
+    --beacon-interval: 80;
+  "
+></canvas>
+
+<script src="./worldsphere.js"></script>
+
+</body>
+</html>

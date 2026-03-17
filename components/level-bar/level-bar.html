@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Knowledge Level</title>
+  <style>
+    body { margin: 0; padding: 0; background: transparent; }
+  </style>
+  <link rel="stylesheet" href="./level-bar.css">
+</head>
+<body>
+<div class="container">
+
+  <div class="annotation annotation-start">You are somewhere<br>here<span class="arrow">▼</span></div>
+  <div class="annotation annotation-end">You want to get<br>here<span class="arrow" style="animation-delay:0.2s">▼</span></div>
+
+  <div class="bar-wrapper">
+    <div class="bar-track" id="bar"></div>
+  </div>
+
+  <div class="labels">
+    <div class="label" style="text-align:left">Beginner</div>
+    <div class="label">Novice</div>
+    <div class="label">Professional</div>
+    <div class="label" style="text-align:right">Teacher</div>
+  </div>
+</div>
+
+<script src="./level-bar.js"></script>
+</body>
+</html>

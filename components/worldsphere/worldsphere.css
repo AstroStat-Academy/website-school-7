@@ -1,0 +1,26 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: transparent;
+  color: #fff;
+  font-family: 'Space Grotesk', monospace;
+  overflow: hidden;
+  cursor: default;
+}
+canvas {
+  display: block;
+  cursor: pointer;
+  background: radial-gradient(circle at center, #0a0e18 0%, #070a12 100%);
+
+  /* Blinking countries colors - clickable in VS Code */
+  --blink-fill-color: #cfca66;
+  --blink-stroke-color: #acb55d;
+
+  /* City dots colors - clickable in VS Code */
+  --city-dot-color: #cf564b;     /* Orange dot color */
+  --city-dot-size: 6;            /* Dot radius in pixels */
+  --city-dot-stroke-color: #5a0a0a; /* City dot stroke color */
+  --city-dot-stroke-width: 1.5;  /* City dot stroke width */
+  --beacon-wave-color: #b04c43;  /* Beacon wave color */
+  --beacon-wave-speed: 0.8;      /* Wave expansion speed */
+  --beacon-interval: 80;        /* Frames between new waves */
+}
