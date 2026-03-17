@@ -20,6 +20,7 @@
   let footerVisible = false;
   let transitioning = false, transitionScrolled = false;
   let transitionStart = 0;
+  let shockwave = null;
   const TRANSITION_DURATION = 180;   // frames for the white-flash reveal (triggered by startTransition)
 
   // ── STATE MACHINE ─────────────────────────────────────────────────────────────
@@ -188,7 +189,7 @@
       stars.push({
         angle, dist, homeDist: dist,
         orbitSpeed: ORBIT_FACE_BASE + nc * nc * ORBIT_INNER_BOOST,
-        x: ox, y: oy,
+        x: ox, y: oy, vx: 0, vy: 0,
         assigned: true, targetX: p.x, targetY: p.y,
         faceType: p.type, jawRole: p.jawRole, jawW: p.jawW,
         morphDelay: Math.random() * MORPH_STAGGER,
@@ -219,7 +220,7 @@
       stars.push({
         angle, dist, homeDist: dist,
         orbitSpeed: ORBIT_BG_BASE + nc * nc * ORBIT_INNER_BOOST,
-        x: ox, y: oy,
+        x: ox, y: oy, vx: 0, vy: 0,
         assigned: false, targetX: 0, targetY: 0, faceType: null, jawRole: null, jawW: 0,
         morphDelay: 0, morphT: 0,
         baseSize: base, size: base,
@@ -447,6 +448,15 @@
       s.cascadeEnergy *= 0.65;
     }
 
+    // Shockwave expanding ring
+    let swRadius = -1, swWidth = 120;
+    if (shockwave) {
+      const el = time - shockwave.startTime;
+      swRadius = el * 4;
+      if (swRadius > Math.sqrt(W * W + H * H) + swWidth) { shockwave = null; swRadius = -1; }
+    }
+    const transOutwardForce = transitioning ? transProgress * 0.8 : 0;
+
     // Update star positions
     const jaw    = biteOpen();
     const maxJaw = H * BITE_MAX_JAW;
@@ -455,25 +465,54 @@
       s.angle += s.orbitSpeed;
       const orbX = cx + Math.cos(s.angle) * s.dist;
       const orbY = cy + Math.sin(s.angle) * s.dist;
-      s.dist += (s.homeDist - s.dist) * 0.003;
 
-      if (s.assigned) {
-        const _t    = Math.max(0, (globalMorphT - s.morphDelay) / (1 - s.morphDelay));
-        const easeIn = Math.pow(_t, MORPH_EASE_IN);
-        const localT = 1 - Math.pow(1 - easeIn, MORPH_EASE);
-        s.morphT = localT;
-
-        let tx = s.targetX, ty = s.targetY;
-        if (s.jawRole && state === 'face') {
-          ty += (s.jawRole === 'upper' ? -1 : 1) * jaw * maxJaw * s.jawW;
+      if (transitioning) {
+        // Shockwave kick
+        if (swRadius > 0 && shockwave) {
+          const sdx = s.x - shockwave.cx, sdy = s.y - shockwave.cy;
+          const sD = Math.hypot(sdx, sdy);
+          const dfw = Math.abs(sD - swRadius);
+          if (dfw < swWidth && sD > 1) {
+            const wi = 1 - dfw / swWidth;
+            s.vx += (sdx / sD) * wi * 1.2;
+            s.vy += (sdy / sD) * wi * 1.2;
+            s.pulse = Math.min(1, s.pulse + wi * 0.5);
+          }
         }
-
-        const jx = Math.sin(time * s.jFreq + s.jPhaseX) * s.jAmp * s.morphT;
-        const jy = Math.cos(time * s.jFreq + s.jPhaseY) * s.jAmp * s.morphT;
-        s.x = orbX + (tx - orbX) * s.morphT + jx;
-        s.y = orbY + (ty - orbY) * s.morphT + jy;
+        // Continuous outward acceleration
+        const tdx = s.x - cx, tdy = s.y - cy;
+        const tD = Math.hypot(tdx, tdy) || 1;
+        s.vx += (tdx / tD) * transOutwardForce;
+        s.vy += (tdy / tD) * transOutwardForce;
+        s.pulse = Math.min(1, s.pulse + transProgress * 0.02);
+        // Apply velocity (low damping so stars keep flying)
+        s.vx *= 0.97; s.vy *= 0.97;
+        s.x += s.vx; s.y += s.vy;
+        // Update orbital params from new position
+        const ndx = s.x - cx, ndy = s.y - cy;
+        s.dist = Math.hypot(ndx, ndy);
+        s.angle = Math.atan2(ndy, ndx);
       } else {
-        s.x = orbX; s.y = orbY; s.morphT = 0;
+        s.dist += (s.homeDist - s.dist) * 0.003;
+
+        if (s.assigned) {
+          const _t    = Math.max(0, (globalMorphT - s.morphDelay) / (1 - s.morphDelay));
+          const easeIn = Math.pow(_t, MORPH_EASE_IN);
+          const localT = 1 - Math.pow(1 - easeIn, MORPH_EASE);
+          s.morphT = localT;
+
+          let tx = s.targetX, ty = s.targetY;
+          if (s.jawRole && state === 'face') {
+            ty += (s.jawRole === 'upper' ? -1 : 1) * jaw * maxJaw * s.jawW;
+          }
+
+          const jx = Math.sin(time * s.jFreq + s.jPhaseX) * s.jAmp * s.morphT;
+          const jy = Math.cos(time * s.jFreq + s.jPhaseY) * s.jAmp * s.morphT;
+          s.x = orbX + (tx - orbX) * s.morphT + jx;
+          s.y = orbY + (ty - orbY) * s.morphT + jy;
+        } else {
+          s.x = orbX; s.y = orbY; s.morphT = 0;
+        }
       }
 
       s.pulse         *= s.pulseDecay;
@@ -586,8 +625,9 @@
 
     startTransition: function () {
       if (transitioning) return;
-      transitioning    = true;
-      transitionStart  = time;
+      transitioning   = true;
+      transitionStart = time;
+      shockwave = { startTime: time, cx: W / 2, cy: H / 2 };
       heroEl.style.transition = 'opacity 1.5s ease';
       heroEl.style.opacity    = '0';
     },
