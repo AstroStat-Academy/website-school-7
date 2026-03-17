@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stellar Background</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #06080e; cursor: default; }
+    canvas { display: block; width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+(function () {
+  'use strict';
+
+  const canvas = document.getElementById('c');
+  const ctx    = canvas.getContext('2d');
+
+  let W, H, cx, cy, maxDist;
+  let time = 0, stars = [];
+
+  // ╔══════════════════════════════════════════════════════════════════════════╗
+  // ║  STATE MACHINE                                                           ║
+  // ║  'idle'  →  click  →  'morphing'  →  done  →  'face'                   ║
+  // ╚══════════════════════════════════════════════════════════════════════════╝
+  let state         = 'idle';
+  let morphStart    = 0;
+  let biteStartTime = -1;   // set when morph first reaches 99% — bite only begins then
+
+  // ── MORPH SPEED ──────────────────────────────────────────────────────────────
+  // Total duration of the morph transition, in frames (60 fps ≈ 1 second).
+  // Lower = faster.  380 ≈ 6.3 s.
+  const MORPH_DUR = 700;
+
+  // Per-star stagger: each star gets a random delay in [0 .. MORPH_STAGGER]
+  // before it starts moving toward its face position (normalised 0–1 fraction
+  // of MORPH_DUR).  0 = all stars move together.  0.8 = very spread out wave.
+  const MORPH_STAGGER = 0.5;
+
+  // Shape of each star's travel curve: ease-in-out, asymmetric (slow start, very heavy deceleration at end)
+  // Formula: 1 - (1 - t^MORPH_EASE_IN)^MORPH_EASE — inner power gives slow start, outer gives heavy slow-down at arrival
+  const MORPH_EASE_IN = 4;    // ease-in power at start (higher = slower launch)
+  // Stars burst out of orbit quickly then decelerate to a dead stop at their
+  // target (velocity is mathematically zero on arrival — no snap).
+  // 2 = moderate ease-out
+  // 4 = long gentle float into place     ← recommended
+  // 7 = star almost freezes near its target, creeps the last stretch
+  const MORPH_EASE = 8;     // ease-out power at end   (higher = longer creep to destination)
+
+  // How much each assigned star's idle orbit is pre-biased toward its face target.
+  // 0 = fully random position (long travel),  1 = starts right at the target (face visible at rest).
+  // 0.35 is a good default: shorter travel, face not recognisable.
+  const IDLE_BIAS = 0.5;
+
+  // ── ORBIT SPEED ───────────────────────────────────────────────────────────────
+  // Base orbital speed (rad/frame) for face-assigned stars and background stars.
+  // Inner stars are faster: actual speed = BASE + nc²×ORBIT_INNER_BOOST
+  const ORBIT_FACE_BASE   = 0.0005;   // face-assigned stars
+  const ORBIT_BG_BASE     = 0.0001;   // background stars (set lower for slower feel)
+  const ORBIT_INNER_BOOST = 0.0006;   // extra speed added for stars near the centre
+
+  // Seconds after page load before the morph starts automatically.
+  // Set to 0 to start immediately.  Click still works during the delay.
+  const AUTO_START_DELAY = 1.0;
+
+
+  // ╔══════════════════════════════════════════════════════════════════════════╗
+  // ║  NEURAL CASCADE — the flickering "synaptic" pulse effect                ║
+  // ╚══════════════════════════════════════════════════════════════════════════╝
+
+  // Max pixel distance at which two stars draw a connecting line and can
+  // pass cascade energy to each other.  Larger = more connections, denser web.
+  const CONN_DIST = 80;
+
+  // How many frames a star must wait after firing before it can fire again.
+  // Lower = more rapid re-firing.
+  const REFRACT = 160;
+
+  let nextFire = 180;   // frame counter until next auto-fire
+
+  // ── Spatial grid (internal — speeds up neighbor lookups) ─────────────────────
+  const GCELL = CONN_DIST;
+  let grid = {};
+  function buildGrid() {
+    grid = {};
+    for (let i = 0; i < stars.length; i++) {
+      const s = stars[i];
+      const k = (s.x/GCELL|0)+','+(s.y/GCELL|0);
+      (grid[k]||(grid[k]=[])).push(i);
+    }
+  }
+  function nbrs(s) {
+    const gx=s.x/GCELL|0, gy=s.y/GCELL|0, r=[];
+    for (let dx=-1;dx<=1;dx++) for (let dy=-1;dy<=1;dy++) {
+      const k=(gx+dx)+','+(gy+dy); if (grid[k]) for (const i of grid[k]) r.push(i);
+    }
+    return r;
+  }
+
+  // ── Easing functions ──────────────────────────────────────────────────────────
+  // smoothstep: slow at both ends, fast in the middle — good for star travel
+  function smoothstep(t) { t=Math.max(0,Math.min(1,t)); return t*t*(3-2*t); }
+  // easeOutCubic: fast start, decelerates — used for eye-glow fade-in
+  function easeOutCubic(t) { return 1-Math.pow(1-Math.max(0,Math.min(1,t)),3); }
+
+  // ╔══════════════════════════════════════════════════════════════════════════╗
+  // ║  BITE ANIMATION                                                          ║
+  // ╚══════════════════════════════════════════════════════════════════════════╝
+
+  // Morph progress (0–1) at which the bite animation begins.
+  // 1.0 = only after morph is fully complete.  0.9 = starts while last 10% still settling.
+  const BITE_START_AT = 0.999;
+
+  // Total length of one open-and-shut cycle, in frames.
+  // Lower = faster biting.  200 ≈ 3.3 s per bite.
+  const BITE_CYCLE = 200;
+
+  // Shape of the bite within one cycle (all fractions of BITE_CYCLE):
+  //   0 → BITE_OPEN_END   : mouth opens  (slow)
+  //   BITE_OPEN_END → BITE_SHUT_END : mouth snaps shut (fast)
+  //   BITE_SHUT_END → 1.0 : mouth stays closed (pause)
+  const BITE_OPEN_END = 0.55;   // increase to make the open phase longer
+  const BITE_SHUT_END = 0.80;   // increase to make the snap slower
+
+  // ╔══════════════════════════════════════════════════════════════════════════╗
+  // ║  EYE GLOW                                                                ║
+  // ╚══════════════════════════════════════════════════════════════════════════╝
+
+  // How far into the morph (0–1) before the eye glow starts appearing.
+  // 0 = immediately.  0.9 = only in the last 10% of the morph.
+  const EYE_GLOW_DELAY = 0.8;
+
+  // Overall brightness multiplier for the eye glow.
+  // 1.0 = default.  0.5 = half as bright.  2.0 = twice as intense.
+  const EYE_GLOW_INTENSITY = 0.2;
+
+  // Controls how slowly the glow builds once it starts.
+  // 1 = linear (steady).  2 = slow start, accelerates.  4 = very slow creep.
+  const EYE_GLOW_EASE = 1.0;
+
+  // How far each jaw half travels at maximum opening, as a fraction of canvas height.
+  // 0.05 = subtle.  0.10 = very dramatic.
+  const BITE_MAX_JAW = 0.058;
+
+  function biteOpen() {
+    if (biteStartTime < 0) return 0;   // morph not at 99% yet
+    const p = ((time - biteStartTime) % BITE_CYCLE) / BITE_CYCLE;
+    if (p < BITE_OPEN_END)  return smoothstep(p / BITE_OPEN_END);
+    if (p < BITE_SHUT_END)  return 1 - smoothstep((p - BITE_OPEN_END) / (BITE_SHUT_END - BITE_OPEN_END));
+    return 0;
+  }
+
+  // ── Quadratic bezier y-value helper ───────────────────────────────────────────
+  function qby(t,y0,y1,y2) { return (1-t)*(1-t)*y0+2*(1-t)*t*y1+t*t*y2; }
+
+  // ╔══════════════════════════════════════════════════════════════════════════╗
+  // ║  FACE GEOMETRY                                                           ║
+  // ║  All positions are fractions of W (width) and H (height), so the face   ║
+  // ║  scales with the window.                                                 ║
+  // ╚══════════════════════════════════════════════════════════════════════════╝
+  function facePoints() {
+    const pts = [];
+
+    // ── Mouth boundaries ────────────────────────────────────────────────────────
+    // Left/right edges of the mouth (fraction of W).  Wider = more teeth.
+    const ML = W*0.155,  MR = W*0.845;
+
+    // Upper gum arc: corner Y and control-point Y (fraction of H).
+    // UGcY = height of corners.  UGctY = height of the curve peak (must be < UGcY).
+    // Lower UGctY (closer to 0) = more pronounced smile curve.
+    const UGcY  = H*0.700,  UGctY = H*0.512;
+
+    // Lower gum arc: same idea, sits below the upper arc.
+    // Gap between arcs = space for teeth.
+    const LGcY  = H*0.800,  LGctY = H*0.618;
+
+    // Jaw-hinge weight: stars at the corners barely move; centre moves most.
+    // Produces a realistic hinged-jaw effect during biting.
+    function w(x) { return Math.sin(((x-ML)/(MR-ML))*Math.PI); }
+
+    // ── Eyes ────────────────────────────────────────────────────────────────────
+    // Centre positions as fractions of W and H.
+    // EAX = horizontal half-axis,  EAY = vertical half-axis.
+    // 0.42 = how much the ends are pinched to form the cat-eye almond shape
+    //        (0 = plain ellipse, closer to 1 = more pointed).
+    const EAX = W*0.105,  EAY = H*0.053;
+    for (const [ecx,ecy] of [[W*0.33, H*0.37], [W*0.67, H*0.37]]) {
+      for (let i=0; i<65; i++) {   // eye rim density — increase for more stars on the outline
+        const t=(i/65)*Math.PI*2, sq=1-0.42*Math.cos(t)*Math.cos(t);
+        pts.push({x:ecx+EAX*Math.cos(t), y:ecy+EAY*Math.sin(t)*sq, type:'eye', jawRole:null, jawW:0});
+      }
+      // Pupil slit (vertical line of stars through the eye centre)
+      for (let i=0; i<20; i++) {  // pupil slit density — increase for more stars on the slit
+        const f=i/19;
+        pts.push({x:ecx+(Math.random()-0.5)*2, y:ecy-EAY*0.68+f*EAY*1.36, type:'pupil', jawRole:null, jawW:0});
+      }
+    }
+
+    // ── Gum lines ────────────────────────────────────────────────────────────────
+    // Evenly spaced points along each arc.  Increase for a denser/smoother line.
+    for (let i=0; i<=22; i++) {  // gum density — was 44
+      const tx=i/22, x=ML+tx*(MR-ML);
+      pts.push({x, y:qby(tx,UGcY,UGctY,UGcY), type:'gum',      jawRole:'upper', jawW:w(x)});
+      pts.push({x, y:qby(tx,LGcY,LGctY,LGcY), type:'gum-lower', jawRole:'lower', jawW:w(x)});
+    }
+
+    // ── Upper teeth ──────────────────────────────────────────────────────────────
+    // 10 triangles hanging downward from the upper gum arc.
+    // 0.80 = how far the tip reaches into the gap (0=at gum, 1=touching lower gum).
+    const N_UPPER_TEETH = 10;
+    for (let k=0; k<N_UPPER_TEETH; k++) {
+      const ta=(k+0.07)/N_UPPER_TEETH, tb=(k+0.50)/N_UPPER_TEETH, tc=(k+0.93)/N_UPPER_TEETH;
+      const xa=ML+ta*(MR-ML), xb=ML+tb*(MR-ML), xc=ML+tc*(MR-ML);
+      const ya=qby(ta,UGcY,UGctY,UGcY), yb=qby(tb,UGcY,UGctY,UGcY), yc=qby(tc,UGcY,UGctY,UGcY);
+      const tipY = yb+(qby(tb,LGcY,LGctY,LGcY)-yb)*0.80,  tipX=xb;
+      for (let i=0; i<=5; i++) {   // upper tooth edge density — was 11
+        const f=i/5;
+        pts.push({x:xa+f*(tipX-xa),   y:ya+f*(tipY-ya),   type:'tooth',     jawRole:'upper', jawW:w(xa+f*(tipX-xa))});
+        pts.push({x:tipX+f*(xc-tipX), y:tipY+f*(yc-tipY), type:'tooth',     jawRole:'upper', jawW:w(tipX+f*(xc-tipX))});
+      }
+    }
+
+    // ── Lower teeth ───────────────────────────────────────────────────────────────
+    // 9 triangles pointing upward from the lower gum arc.
+    // 0.66 = how far the tip reaches up into the gap.
+    const N_LOWER_TEETH = 9;
+    for (let k=0; k<N_LOWER_TEETH; k++) {
+      const ta=(k+0.07)/N_LOWER_TEETH, tb=(k+0.50)/N_LOWER_TEETH, tc=(k+0.93)/N_LOWER_TEETH;
+      const xa=ML+ta*(MR-ML), xb=ML+tb*(MR-ML), xc=ML+tc*(MR-ML);
+      const ya=qby(ta,LGcY,LGctY,LGcY), yb=qby(tb,LGcY,LGctY,LGcY), yc=qby(tc,LGcY,LGctY,LGcY);
+      const tipY = yb-(yb-qby(tb,UGcY,UGctY,UGcY))*0.66,  tipX=xb;
+      for (let i=0; i<=4; i++) {   // lower tooth edge density — was 9
+        const f=i/4;
+        pts.push({x:xa+f*(tipX-xa),   y:ya+f*(tipY-ya),   type:'tooth-lower', jawRole:'lower', jawW:w(xa+f*(tipX-xa))});
+        pts.push({x:tipX+f*(xc-tipX), y:tipY+f*(yc-tipY), type:'tooth-lower', jawRole:'lower', jawW:w(tipX+f*(xc-tipX))});
+      }
+    }
+
+    return pts;
+  }
+
+  // ── Resize helper ─────────────────────────────────────────────────────────────
+  function resize() {
+    W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight;
+    cx=W/2; cy=H/2; maxDist=Math.sqrt(cx*cx+cy*cy);
+  }
+
+  // ╔══════════════════════════════════════════════════════════════════════════╗
+  // ║  STAR CREATION                                                           ║
+  // ╚══════════════════════════════════════════════════════════════════════════╝
+  function createStars() {
+    stars = [];
+    const fp = facePoints();
+
+    // ── Face-assigned stars ───────────────────────────────────────────────────────
+    // One star per face contour point.  Each starts at a random orbital position
+    // and travels to its face target when the morph is triggered.
+    fp.forEach(p => {
+      // Bias the idle orbit toward the face target so stars travel less.
+      // We blend the random orbital vector with the target's vector from centre.
+      const rndAngle = Math.random()*Math.PI*2;
+      const rndDist  = 60+Math.random()*(Math.min(W,H)*0.46);
+      const rndX = Math.cos(rndAngle)*rndDist,  rndY = Math.sin(rndAngle)*rndDist;
+      const tgtX = p.x-cx,  tgtY = p.y-cy;   // target vector from centre
+      const bX = rndX*(1-IDLE_BIAS) + tgtX*IDLE_BIAS;
+      const bY = rndY*(1-IDLE_BIAS) + tgtY*IDLE_BIAS;
+      const angle = Math.atan2(bY, bX);
+      const dist  = Math.hypot(bX, bY) || rndDist;
+      const ox=cx+bX,  oy=cy+bY;
+      const ed=Math.max(dist,50),  nc=1-Math.sqrt(ed/maxDist);
+      const isEye   = p.type==='eye'||p.type==='pupil';
+      const isTooth = p.type==='tooth'||p.type==='tooth-lower';
+      // Eye stars are slightly larger; tooth stars largest (they need to be visible).
+      const base = isEye ? Math.random()*1.4+0.8 : isTooth ? Math.random()*1.6+0.9 : Math.random()*1.1+0.5;
+
+      stars.push({
+        // ── Orbital properties (used while idle and during morph) ────────────────
+        angle,
+        dist,
+        homeDist: dist,
+        // Stars closer to centre orbit faster (nc closer to 1).
+        // Increase the multiplier (0.0006) for faster outer stars.
+        orbitSpeed: ORBIT_FACE_BASE+nc*nc*ORBIT_INNER_BOOST,
+
+        x: ox, y: oy,   // current position (updated each frame)
+
+        // ── Morph target ──────────────────────────────────────────────────────────
+        assigned: true,
+        targetX: p.x,  targetY: p.y,
+        faceType: p.type,
+        jawRole:  p.jawRole,   // 'upper' | 'lower' | null
+        jawW:     p.jawW,      // 0–1: how much this star participates in jaw movement
+
+        // Random delay before this star starts moving (fraction of MORPH_DUR).
+        // Creates the staggered wave effect.  Set to 0 for all-at-once.
+        morphDelay: Math.random()*MORPH_STAGGER,
+        morphT: 0,   // 0 = at orbital position,  1 = at face target
+
+        // ── Organic jitter ────────────────────────────────────────────────────────
+        // Each face star drifts on its own slow sine path once settled, making
+        // the contours feel alive rather than geometrically rigid.
+        // jAmp  : max displacement in pixels.  2–5 is subtle; 8+ is very wobbly.
+        // jFreq : oscillation speed in rad/frame.  0.005–0.02 is imperceptibly slow.
+        // jPhaseX/Y : random offsets so no two stars move in sync.
+        jAmp:    3.5 + Math.random()*5.0,
+        jFreq:   0.006 + Math.random()*0.010,
+        jPhaseX: Math.random()*Math.PI*2,
+        jPhaseY: Math.random()*Math.PI*2,
+
+        // ── Appearance ────────────────────────────────────────────────────────────
+        baseSize: base,  size: base,
+        baseOpacity: isEye ? 0.55+Math.random()*0.3 : isTooth ? 0.50+Math.random()*0.3 : 0.22+Math.random()*0.25,
+        twinkleSpeed:  0.006+Math.random()*0.011,
+        twinkleOffset: Math.random()*Math.PI*2,
+        pulse:0, pulseDecay:0.954,
+        cascadeEnergy:0, cascadeReady:false, refractoryUntil:0,
+        binaryDigit: Math.random()<0.5?'0':'1',  binaryShow:0,  dotOpacity:1,
+      });
+    });
+
+    // ── Ambient background stars (never join the face) ────────────────────────────
+    // Density: one star per BG_DENSITY square pixels.  Lower = more stars.
+    const BG_DENSITY = 4200;
+    const bgN = Math.floor(W*H/BG_DENSITY);
+    for (let i=0; i<bgN; i++) {
+      const angle = Math.random()*Math.PI*2;
+      const dist  = 30+Math.random()*(Math.min(W,H)*0.48);
+      const ox=cx+Math.cos(angle)*dist,  oy=cy+Math.sin(angle)*dist;
+      const ed=Math.max(dist,50),  nc=1-Math.sqrt(ed/maxDist);
+      const base = Math.random()*1.2+0.3;
+      stars.push({
+        angle, dist, homeDist:dist,
+        orbitSpeed: ORBIT_BG_BASE+nc*nc*ORBIT_INNER_BOOST,
+        x:ox, y:oy,
+        assigned:false, targetX:0, targetY:0, faceType:null, jawRole:null, jawW:0,
+        morphDelay:0,  morphT:0,
+        baseSize:base, size:base,
+        baseOpacity: Math.random()*0.28+0.07,
+        twinkleSpeed:  0.004+Math.random()*0.008,
+        twinkleOffset: Math.random()*Math.PI*2,
+        pulse:0, pulseDecay:0.958,
+        cascadeEnergy:0, cascadeReady:false, refractoryUntil:0,
+        binaryDigit: Math.random()<0.5?'0':'1',  binaryShow:0,  dotOpacity:1,
+      });
+    }
+  }
+
+  // ╔══════════════════════════════════════════════════════════════════════════╗
+  // ║  NEBULAE  — soft coloured blobs drifting slowly in the background       ║
+  // ║  Each entry: [ x, y, radius, [r,g,b], opacity ]                        ║
+  // ║  x/y are fractions of W/H.  radius is a fraction of max(W,H).          ║
+  // ╚══════════════════════════════════════════════════════════════════════════╝
+  const NEBULAE = [
+    [0.15, 0.28, 0.32, [14,  20, 60], 0.09],
+    [0.78, 0.62, 0.26, [38,  14, 68], 0.08],
+    [0.38, 0.82, 0.24, [50,  12, 55], 0.07],
+  ];
+
+  // ╔══════════════════════════════════════════════════════════════════════════╗
+  // ║  COLOURS                                                                 ║
+  // ║  Stars interpolate from COL_BASE (starfield) to their face colour       ║
+  // ║  as morphT goes 0 → 1.                                                  ║
+  // ╚══════════════════════════════════════════════════════════════════════════╝
+  const COL_BASE  = [185, 195, 218];   // idle starfield: blue-white
+  const COL_EYE   = [228,  95,  12];   // eye / pupil stars: orange-red
+  const COL_TOOTH = [215, 218, 232];   // teeth stars: bright cold white
+  const COL_GUM   = [165, 172, 208];   // gum stars: muted blue-gray
+
+  function targetCol(faceType) {
+    if (faceType==='eye'||faceType==='pupil')         return COL_EYE;
+    if (faceType==='tooth'||faceType==='tooth-lower') return COL_TOOTH;
+    if (faceType==='gum'||faceType==='gum-lower')     return COL_GUM;
+    return COL_BASE;
+  }
+
+  // ── Neural cascade helpers ────────────────────────────────────────────────────
+  function triggerFire() {
+    // Face stars are preferred seeds; background stars fire less often.
+    const pool = stars.filter(s => s.refractoryUntil<=time && (s.assigned||Math.random()<0.3));
+    if (!pool.length) return;
+    const s = pool[Math.floor(Math.random()*pool.length)];
+    s.pulse=1; s.cascadeEnergy=1; s.cascadeReady=true;
+    s.refractoryUntil=time+REFRACT;
+    s.binaryShow=1; s.dotOpacity=0; s.binaryDigit=Math.random()<0.5?'0':'1';
+  }
+  // Gap between auto-fires: random interval in [200, 560] frames.
+  function scheduleNext() { nextFire=time+200+Math.random()*360; }
+
+  // ── Bite-snap fire ────────────────────────────────────────────────────────────
+  // Fires a burst of cascade seeds from the teeth the instant the mouth closes.
+  // BITE_SEED_COUNT : how many teeth/gum stars ignite simultaneously.
+  //                   Higher = bigger shockwave.  4–10 is a good range.
+  const BITE_SEED_COUNT = 7;
+  function triggerBiteFire() {
+    const pool = stars.filter(s =>
+      s.assigned && s.refractoryUntil <= time &&
+      (s.faceType==='tooth' || s.faceType==='tooth-lower' ||
+       s.faceType==='gum'   || s.faceType==='gum-lower')
+    );
+    // Pick random seeds and ignite them all at once
+    for (let n=0; n<BITE_SEED_COUNT && pool.length; n++) {
+      const idx = Math.floor(Math.random()*pool.length);
+      const s   = pool.splice(idx,1)[0];
+      s.pulse=1; s.cascadeEnergy=1; s.cascadeReady=true;
+      s.refractoryUntil=time+REFRACT;
+      s.binaryShow=1; s.dotOpacity=0; s.binaryDigit=Math.random()<0.5?'0':'1';
+    }
+  }
+
+  // ── Morph trigger (called on first click) ─────────────────────────────────────
+  function startMorph() {
+    if (state!=='idle') return;
+    state='morphing'; morphStart=time;
+  }
+
+  // ── Auto-start after delay ────────────────────────────────────────────────────
+  setTimeout(startMorph, AUTO_START_DELAY * 1000);
+
+  // ── Click handler ─────────────────────────────────────────────────────────────
+  canvas.addEventListener('click', e => {
+    if (state==='idle') { startMorph(); return; }
+    // After morph: clicks trigger a pulse wave (same as the original starfield)
+    const R=250;
+    stars.forEach(s => {
+      const d=Math.hypot(s.x-e.clientX, s.y-e.clientY);
+      if (d<R) {
+        const I=Math.pow(1-d/R,1.5);
+        s.pulse=Math.min(1,s.pulse+I);
+        setTimeout(()=>{s.binaryShow=Math.min(1,s.binaryShow+0.5+I*0.8); s.dotOpacity=0; s.binaryDigit=Math.random()<0.5?'0':'1';},d*0.35);
+        s.cascadeEnergy=Math.min(1,s.cascadeEnergy+I*0.7);
+        s.cascadeReady=true; s.refractoryUntil=time+REFRACT;
+      }
+    });
+  });
+
+  // ╔══════════════════════════════════════════════════════════════════════════╗
+  // ║  MAIN RENDER LOOP                                                        ║
+  // ╚══════════════════════════════════════════════════════════════════════════╝
+  function loop() {
+    // Clear with solid dark background colour
+    ctx.fillStyle='rgb(6,8,14)';
+    ctx.fillRect(0,0,W,H);
+
+    const t = time*0.001;   // slow time for nebula drift / eye pulse
+
+    // ── Global morph progress (0 = full starfield, 1 = full face) ────────────────
+    const globalMorphT = state==='idle'     ? 0 :
+                         state==='face'     ? 1 :
+                         Math.min(1,(time-morphStart)/MORPH_DUR);
+    if (state==='morphing' && globalMorphT>=1) state='face';
+    // Start bite animation once morph reaches 99% — mouth opens from the beginning of cycle
+    if (biteStartTime < 0 && globalMorphT >= BITE_START_AT) biteStartTime = time;
+
+    const eyeAlpha = state==='idle' ? 0
+      : Math.pow(Math.max(0, (globalMorphT - EYE_GLOW_DELAY) / (1 - EYE_GLOW_DELAY)), EYE_GLOW_EASE);
+
+    // ── Nebulae ───────────────────────────────────────────────────────────────────
+    for (const [nx,ny,nr,c,op] of NEBULAE) {
+      // Gentle slow drift: each nebula moves on its own Lissajous path
+      const px=(nx+Math.sin(t*0.11+nx*7)*0.06)*W,  py=(ny+Math.cos(t*0.09+ny*9)*0.06)*H;
+      const r=nr*Math.max(W,H);
+      const g=ctx.createRadialGradient(px,py,0,px,py,r);
+      g.addColorStop(0,   `rgba(${c[0]},${c[1]},${c[2]},${op})`);
+      g.addColorStop(0.5, `rgba(${c[0]},${c[1]},${c[2]},${op*0.4})`);
+      g.addColorStop(1,   'transparent');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    }
+
+    // ── Eye glow ──────────────────────────────────────────────────────────────────
+    if (eyeAlpha>0.01) {
+      // ep: base intensity × glow constant × fade-in alpha × slow breathing pulse
+      const ep=(0.68+Math.sin(t*1.7)*0.12+Math.sin(t*3.3)*0.05)*eyeAlpha*EYE_GLOW_INTENSITY;
+
+      for (const [ex,ey] of [[W*0.33,H*0.37],[W*0.67,H*0.37]]) {
+        const erx=W*0.125,  ery=H*0.076;
+
+        // Scale Y so the gradient fills an ellipse matching the eye shape
+        ctx.save(); ctx.translate(ex,ey); ctx.scale(1,ery/erx);
+
+        // Outer halo (dim red)
+        const halo=ctx.createRadialGradient(0,0,0,0,0,erx*1.8);
+        halo.addColorStop(0,   `rgba(180,30,0,${ep*0.40})`);
+        halo.addColorStop(0.5, `rgba(120,15,0,${ep*0.20})`);
+        halo.addColorStop(1,   'transparent');
+        ctx.fillStyle=halo; ctx.beginPath(); ctx.arc(0,0,erx*1.8,0,Math.PI*2); ctx.fill();
+
+        // Inner fire (bright orange-yellow core → deep red rim)
+        const fire=ctx.createRadialGradient(0,0,0,0,0,erx);
+        fire.addColorStop(0,    `rgba(255,160,20,${ep*0.82})`);
+        fire.addColorStop(0.20, `rgba(240, 90, 5,${ep*0.68})`);
+        fire.addColorStop(0.50, `rgba(185, 28, 3,${ep*0.44})`);
+        fire.addColorStop(0.80, `rgba(110, 10, 2,${ep*0.20})`);
+        fire.addColorStop(1,    'transparent');
+        ctx.fillStyle=fire; ctx.beginPath(); ctx.arc(0,0,erx,0,Math.PI*2); ctx.fill();
+        ctx.restore();
+
+        // Slit pupil: carve a dark vertical ellipse out of the glow
+        ctx.save(); ctx.globalCompositeOperation='destination-out';
+        ctx.save(); ctx.translate(ex,ey); ctx.scale(0.16,1); ctx.translate(-ex,-ey);
+        const slit=ctx.createRadialGradient(ex,ey,0,ex,ey,erx*0.18);
+        slit.addColorStop(0, `rgba(0,0,0,${0.95*eyeAlpha})`);
+        slit.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle=slit; ctx.beginPath(); ctx.arc(ex,ey,ery*0.92,0,Math.PI*2); ctx.fill();
+        ctx.restore(); ctx.restore();
+      }
+    }
+
+    // ── Neural cascade propagation ────────────────────────────────────────────────
+    if (time%4===0) buildGrid();       // rebuild spatial grid every 4 frames
+    if (time>=nextFire){ triggerFire(); scheduleNext(); }
+    // Detect the exact frame the jaw snaps shut and fire a burst from the teeth
+    if (biteStartTime >= 0 && (time-biteStartTime)%BITE_CYCLE === Math.round(BITE_SHUT_END*BITE_CYCLE)) triggerBiteFire();
+
+    for (let i=0; i<stars.length; i++) {
+      const s=stars[i];
+      if (!(s.cascadeEnergy>0.06 && s.cascadeReady)) continue;
+      s.cascadeReady=false;
+      for (const ni of nbrs(s)) {
+        if (ni===i) continue;
+        const n=stars[ni];  if (n.refractoryUntil>time) continue;
+        const d=Math.hypot(s.x-n.x, s.y-n.y);
+        if (d<CONN_DIST*1.5) {
+          const tr=s.cascadeEnergy*0.27*(1-d/(CONN_DIST*1.5));
+          if (tr>0.006) {
+            n.pulse=Math.min(1,n.pulse+tr*1.2);
+            n.cascadeEnergy=Math.min(0.9,n.cascadeEnergy+tr*0.75);
+            n.cascadeReady=false;  n.refractoryUntil=time+REFRACT;
+            n.binaryShow=Math.min(1,n.binaryShow+0.6+tr*3);
+            n.dotOpacity=0;  n.binaryDigit=Math.random()<0.5?'0':'1';
+            setTimeout(()=>{n.cascadeReady=true;},40+Math.random()*40);
+          }
+        }
+      }
+      s.cascadeEnergy*=0.65;
+    }
+
+    // ── Update star positions ─────────────────────────────────────────────────────
+    const jaw    = biteOpen();
+    const maxJaw = H * BITE_MAX_JAW;
+
+    for (const s of stars) {
+      // Orbital position is ALWAYS advanced, even during/after morph.
+      // As morphT→1, the orbital component is weighted out of the final position.
+      s.angle += s.orbitSpeed;
+      const orbX=cx+Math.cos(s.angle)*s.dist,  orbY=cy+Math.sin(s.angle)*s.dist;
+      s.dist += (s.homeDist-s.dist)*0.003;   // gentle drift back to home radius
+
+      if (s.assigned) {
+        // Compute this star's individual morph progress, accounting for its stagger delay.
+        // Stars with a later delay start moving only after a fraction of MORPH_DUR has passed.
+        const _t = Math.max(0,(globalMorphT-s.morphDelay)/(1-s.morphDelay));
+        const easeIn = Math.pow(_t, MORPH_EASE_IN);            // slow launch
+        const localT = 1 - Math.pow(1 - easeIn, MORPH_EASE); // heavy deceleration into target
+        s.morphT = localT;
+
+        // Apply jaw offset to mouth stars once the face is fully formed
+        let tx=s.targetX,  ty=s.targetY;
+        if (s.jawRole && state==='face') {
+          ty += (s.jawRole==='upper' ? -1 : 1) * jaw * maxJaw * s.jawW;
+        }
+
+        // Final position: blend from orbital to face target
+        // At morphT=0 → orbital;  at morphT=1 → face target exactly
+        // Jitter is multiplied by morphT so it only appears once the star has settled.
+        const jx = Math.sin(time*s.jFreq + s.jPhaseX) * s.jAmp * s.morphT;
+        const jy = Math.cos(time*s.jFreq + s.jPhaseY) * s.jAmp * s.morphT;
+        s.x = orbX+(tx-orbX)*s.morphT + jx;
+        s.y = orbY+(ty-orbY)*s.morphT + jy;
+      } else {
+        // Background stars: pure orbital motion
+        s.x=orbX;  s.y=orbY;  s.morphT=0;
+      }
+
+      s.pulse         *= s.pulseDecay;
+      s.cascadeEnergy *= 0.96;
+      s.binaryShow    *= 0.988;
+      if (s.binaryShow<0.3) s.dotOpacity=Math.min(1,s.dotOpacity+0.025);
+      s.size = s.baseSize + s.pulse*3.5;
+    }
+
+    // ── Connection lines between nearby stars ─────────────────────────────────────
+    for (let i=0; i<stars.length; i++) {
+      const si=stars[i];
+      if (si.x<-50||si.x>W+50||si.y<-50||si.y>H+50) continue;
+      for (let j=i+1; j<stars.length; j++) {
+        const sj=stars[j],  d=Math.hypot(si.x-sj.x,si.y-sj.y);
+        if (d>=CONN_DIST) continue;
+        let a=1-d/CONN_DIST;  a*=a;
+        const pm=Math.max(si.pulse,sj.pulse);
+        a=Math.min(a*(1+pm*8),0.75);  if (a<0.002) continue;
+
+        // Eye connections bleed from blue-white → orange-red as those stars morph in
+        const eye = si.faceType==='eye'||si.faceType==='pupil'||sj.faceType==='eye'||sj.faceType==='pupil';
+        const mt  = Math.max(si.morphT,sj.morphT);
+        const r   = eye ? Math.round(140+mt*60+pm*55) : Math.round(140+pm*80);
+        const g   = eye ? Math.round(155-mt*100+pm*30): Math.round(155+pm*70);
+        const b   = eye ? Math.round(205-mt*197+pm*10): Math.round(205+pm*40);
+        ctx.strokeStyle=`rgba(${r},${g},${b},${a*0.30})`;
+        ctx.lineWidth=0.6+pm*1.8;
+        ctx.beginPath(); ctx.moveTo(si.x,si.y); ctx.lineTo(sj.x,sj.y); ctx.stroke();
+      }
+    }
+
+    // ── Draw stars ────────────────────────────────────────────────────────────────
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    for (const s of stars) {
+      if (s.x<-80||s.x>W+80||s.y<-80||s.y>H+80) continue;
+      const tw = Math.sin(time*s.twinkleSpeed+s.twinkleOffset)*0.12+0.88;  // twinkle factor
+      const p  = s.pulse;
+      const mt = s.morphT;
+
+      // Colour: linearly interpolates from COL_BASE → face-specific colour as morphT rises
+      const tc=targetCol(s.faceType);
+      const tr=Math.min(255,(COL_BASE[0]+(tc[0]-COL_BASE[0])*mt+p*55)|0);
+      const tg=Math.min(255,(COL_BASE[1]+(tc[1]-COL_BASE[1])*mt+p*45)|0);
+      const tb=Math.min(255,(COL_BASE[2]+(tc[2]-COL_BASE[2])*mt+p*30)|0);
+      const clr=`rgb(${tr},${tg},${tb})`;
+
+      // Background stars fade slightly as the face takes over the scene.
+      // 0.35 = how much they dim at full morph.  0 = no dimming.
+      const opFade = s.assigned ? 1 : 1-globalMorphT*0.35;
+      const op = Math.min(1,s.baseOpacity+p*0.6)*tw*opFade;
+
+      if (s.binaryShow>0.06) {
+        // Star is showing a binary digit ('0' or '1') from a cascade pulse
+        const fs=Math.max(7,s.baseSize*4.5+s.binaryShow*11+p*5);
+        ctx.font=`${fs|0}px monospace`;
+        ctx.globalAlpha=Math.min(1,s.binaryShow*1.2+p*0.2)*tw*opFade;
+        ctx.fillStyle=clr;  ctx.fillText(s.binaryDigit,s.x,s.y);
+        if (s.binaryShow>0.15) {
+          // Halo glow around the digit
+          const hr=fs*1.2+p*8;
+          const gg=ctx.createRadialGradient(s.x,s.y,fs*0.15,s.x,s.y,hr);
+          gg.addColorStop(0,`rgba(${tr},${tg},${tb},${Math.max(s.binaryShow,p)*0.2*tw*opFade})`);
+          gg.addColorStop(1,'transparent');
+          ctx.globalAlpha=1;  ctx.fillStyle=gg;
+          ctx.beginPath();  ctx.arc(s.x,s.y,hr,0,Math.PI*2);  ctx.fill();
+        }
+        if (s.dotOpacity>0.05) {
+          // Draw the dot underneath the fading digit
+          ctx.globalAlpha=op*s.dotOpacity;
+          ctx.fillStyle=clr;  ctx.beginPath();  ctx.arc(s.x,s.y,s.size,0,Math.PI*2);  ctx.fill();
+        }
+      } else {
+        // Normal star dot
+        ctx.globalAlpha=op;
+        ctx.fillStyle=clr;  ctx.beginPath();  ctx.arc(s.x,s.y,s.size,0,Math.PI*2);  ctx.fill();
+        if (p>0.05) {
+          // Soft glow halo when pulsing
+          const hr=s.size*4+p*10;
+          const gg=ctx.createRadialGradient(s.x,s.y,s.size*0.5,s.x,s.y,hr);
+          const ga=p*0.3*tw;
+          gg.addColorStop(0,   `rgba(${tr},${tg},${tb},${ga})`);
+          gg.addColorStop(0.4, `rgba(${tr},${tg},${tb},${ga*0.4})`);
+          gg.addColorStop(1,   'transparent');
+          ctx.globalAlpha=1;  ctx.fillStyle=gg;
+          ctx.beginPath();  ctx.arc(s.x,s.y,hr,0,Math.PI*2);  ctx.fill();
+        }
+      }
+    }
+
+    ctx.globalAlpha=1;
+    time++;
+    requestAnimationFrame(loop);
+  }
+
+  window.addEventListener('resize',()=>{ resize(); createStars(); state='idle'; });
+  resize();  createStars();  scheduleNext();  loop();
+})();
+</script>
+</body>
+</html>

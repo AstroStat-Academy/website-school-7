@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stellar Background</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #06080e; }
+    canvas { display: block; width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+(function () {
+  'use strict';
+
+  const canvas = document.getElementById('c');
+  const ctx    = canvas.getContext('2d');
+
+  let W, H, time = 0, stars = [];
+
+  const CONN_DIST = 110;
+  const REFRACT   = 160;
+  let   nextFire  = 180;
+
+  // ── Spatial grid ─────────────────────────────────────────────────────────────
+  const GCELL = CONN_DIST;
+  let grid = {};
+  function buildGrid() {
+    grid = {};
+    for (let i = 0; i < stars.length; i++) {
+      const s = stars[i];
+      const k = (s.x/GCELL|0) + ',' + (s.y/GCELL|0);
+      (grid[k] || (grid[k] = [])).push(i);
+    }
+  }
+  function neighbors(s) {
+    const gx = s.x/GCELL|0, gy = s.y/GCELL|0, r = [];
+    for (let dx = -1; dx <= 1; dx++)
+      for (let dy = -1; dy <= 1; dy++) {
+        const k = (gx+dx) + ',' + (gy+dy);
+        if (grid[k]) for (const i of grid[k]) r.push(i);
+      }
+    return r;
+  }
+
+  // ── Bite animation ────────────────────────────────────────────────────────────
+  // Slow open → quick snap shut → brief pause
+  const BITE_CYCLE = 190; // frames ≈ 3.2 s at 60 fps
+  function biteOpen() {
+    const phase = (time % BITE_CYCLE) / BITE_CYCLE; // 0..1
+    if (phase < 0.58) {
+      // Slow open: smoothstep 0 → 1
+      const p = phase / 0.58;
+      return p * p * (3 - 2 * p);
+    } else if (phase < 0.82) {
+      // Quick snap shut: smoothstep 1 → 0
+      const p = (phase - 0.58) / 0.24;
+      return 1 - p * p * (3 - 2 * p);
+    }
+    // Hold shut
+    return 0;
+  }
+
+  // ── Bezier helper ─────────────────────────────────────────────────────────────
+  function qby(t, y0, y1, y2) {
+    return (1-t)*(1-t)*y0 + 2*(1-t)*t*y1 + t*t*y2;
+  }
+
+  // ── Face contour generator ────────────────────────────────────────────────────
+  function facePoints() {
+    const pts = [];
+    const ML  = W*0.155, MR = W*0.845;
+
+    // Mouth arcs
+    const UGcY = H*0.658, UGctY = H*0.512;
+    const LGcY = H*0.760, LGctY = H*0.618;
+
+    // Jaw weight: 0 at corners → 1 at centre (hinge effect)
+    function w(x) { return Math.sin(((x - ML) / (MR - ML)) * Math.PI); }
+
+    // Eyes — almond / cat-eye
+    const EAX = W*0.105, EAY = H*0.053;
+    for (const [ecx, ecy] of [[W*0.33, H*0.37], [W*0.67, H*0.37]]) {
+      for (let i = 0; i < 30; i++) {
+        const t  = (i / 30) * Math.PI * 2;
+        const sq = 1 - 0.42 * Math.cos(t) * Math.cos(t);
+        pts.push({ x: ecx + EAX*Math.cos(t), y: ecy + EAY*Math.sin(t)*sq, type:'eye', jawRole:null, jawW:0 });
+      }
+      for (let i = 0; i < 8; i++) {
+        const f = i/7;
+        pts.push({ x: ecx+(Math.random()-0.5)*2, y: ecy-EAY*0.68+f*EAY*1.36, type:'pupil', jawRole:null, jawW:0 });
+      }
+    }
+
+    // Upper gum line
+    for (let i = 0; i <= 44; i++) {
+      const tx = i/44, x = ML+tx*(MR-ML);
+      pts.push({ x, y: qby(tx,UGcY,UGctY,UGcY), type:'gum', jawRole:'upper', jawW: w(x) });
+    }
+
+    // Lower gum line
+    for (let i = 0; i <= 44; i++) {
+      const tx = i/44, x = ML+tx*(MR-ML);
+      pts.push({ x, y: qby(tx,LGcY,LGctY,LGcY), type:'gum-lower', jawRole:'lower', jawW: w(x) });
+    }
+
+    // Upper teeth — 10 triangles pointing down
+    for (let k = 0; k < 10; k++) {
+      const ta=(k+0.07)/10, tb=(k+0.50)/10, tc=(k+0.93)/10;
+      const xa=ML+ta*(MR-ML), xb=ML+tb*(MR-ML), xc=ML+tc*(MR-ML);
+      const ya=qby(ta,UGcY,UGctY,UGcY), yb=qby(tb,UGcY,UGctY,UGcY), yc=qby(tc,UGcY,UGctY,UGcY);
+      const lgY=qby(tb,LGcY,LGctY,LGcY);
+      const tipY=yb+(lgY-yb)*0.80, tipX=xb;
+      for (let i = 0; i <= 11; i++) {
+        const f=i/11;
+        pts.push({ x:xa+f*(tipX-xa), y:ya+f*(tipY-ya), type:'tooth', jawRole:'upper', jawW:w(xa+f*(tipX-xa)) });
+        pts.push({ x:tipX+f*(xc-tipX), y:tipY+f*(yc-tipY), type:'tooth', jawRole:'upper', jawW:w(tipX+f*(xc-tipX)) });
+      }
+    }
+
+    // Lower teeth — 9 triangles pointing up
+    for (let k = 0; k < 9; k++) {
+      const ta=(k+0.07)/9, tb=(k+0.50)/9, tc=(k+0.93)/9;
+      const xa=ML+ta*(MR-ML), xb=ML+tb*(MR-ML), xc=ML+tc*(MR-ML);
+      const ya=qby(ta,LGcY,LGctY,LGcY), yb=qby(tb,LGcY,LGctY,LGcY), yc=qby(tc,LGcY,LGctY,LGcY);
+      const ugY=qby(tb,UGcY,UGctY,UGcY);
+      const tipY=yb-(yb-ugY)*0.66, tipX=xb;
+      for (let i = 0; i <= 9; i++) {
+        const f=i/9;
+        pts.push({ x:xa+f*(tipX-xa), y:ya+f*(tipY-ya), type:'tooth-lower', jawRole:'lower', jawW:w(xa+f*(tipX-xa)) });
+        pts.push({ x:tipX+f*(xc-tipX), y:tipY+f*(yc-tipY), type:'tooth-lower', jawRole:'lower', jawW:w(tipX+f*(xc-tipX)) });
+      }
+    }
+
+    return pts;
+  }
+
+  // ── Star factory ──────────────────────────────────────────────────────────────
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function createStars() {
+    stars = [];
+
+    // Face contour stars (static — no orbit)
+    for (const p of facePoints()) {
+      const jit = 2+Math.random()*3.5, ja = Math.random()*Math.PI*2;
+      const x = p.x+Math.cos(ja)*jit, y = p.y+Math.sin(ja)*jit;
+      const isEye   = p.type==='eye'||p.type==='pupil';
+      const isTooth = p.type==='tooth'||p.type==='tooth-lower';
+      const base    = isEye ? Math.random()*1.5+0.8 : isTooth ? Math.random()*1.8+0.9 : Math.random()*1.2+0.5;
+      stars.push({
+        x, y, homeX: x, homeY: y,
+        baseSize: base, size: base,
+        opacity: isEye ? 0.55+Math.random()*0.35 : isTooth ? 0.50+Math.random()*0.35 : 0.22+Math.random()*0.28,
+        twinkleSpeed:  0.006+Math.random()*0.011,
+        twinkleOffset: Math.random()*Math.PI*2,
+        pulse:0, pulseDecay:0.954,
+        cascadeEnergy:0, cascadeReady:false, refractoryUntil:0,
+        binaryDigit: Math.random()<0.5?'0':'1', binaryShow:0, dotOpacity:1,
+        faceType: p.type, isFace: true,
+        jawRole: p.jawRole,    // 'upper' | 'lower' | null
+        jawW:    p.jawW,       // 0..1 hinge weight
+      });
+    }
+
+    // Ambient background stars (static — just twinkle)
+    const bgN = Math.floor(W*H/5800);
+    for (let i = 0; i < bgN; i++) {
+      const x=Math.random()*W, y=Math.random()*H, base=Math.random()*1.3+0.3;
+      stars.push({
+        x, y, homeX:x, homeY:y,
+        baseSize:base, size:base,
+        opacity: Math.random()*0.26+0.07,
+        twinkleSpeed:  0.004+Math.random()*0.008,
+        twinkleOffset: Math.random()*Math.PI*2,
+        pulse:0, pulseDecay:0.958,
+        cascadeEnergy:0, cascadeReady:false, refractoryUntil:0,
+        binaryDigit: Math.random()<0.5?'0':'1', binaryShow:0, dotOpacity:1,
+        faceType:null, isFace:false,
+        jawRole:null, jawW:0,
+      });
+    }
+  }
+
+  // ── Neural cascade ────────────────────────────────────────────────────────────
+  function triggerFire() {
+    const pool = stars.filter(s => s.refractoryUntil<=time && (s.isFace||Math.random()<0.25));
+    if (!pool.length) return;
+    const s = pool[Math.floor(Math.random()*pool.length)];
+    s.pulse=1; s.cascadeEnergy=1; s.cascadeReady=true;
+    s.refractoryUntil=time+REFRACT;
+    s.binaryShow=1; s.dotOpacity=0; s.binaryDigit=Math.random()<0.5?'0':'1';
+  }
+  function scheduleNext() { nextFire = time+200+Math.random()*380; }
+
+  canvas.addEventListener('click', e => {
+    const R = 250;
+    stars.forEach(s => {
+      const d = Math.hypot(s.x-e.clientX, s.y-e.clientY);
+      if (d < R) {
+        const I = Math.pow(1-d/R, 1.5);
+        s.pulse=Math.min(1,s.pulse+I);
+        setTimeout(()=>{ s.binaryShow=Math.min(1,s.binaryShow+0.5+I*0.8); s.dotOpacity=0; s.binaryDigit=Math.random()<0.5?'0':'1'; }, d*0.35);
+        s.cascadeEnergy=Math.min(1,s.cascadeEnergy+I*0.7);
+        s.cascadeReady=true; s.refractoryUntil=time+REFRACT;
+      }
+    });
+  });
+
+  // ── Render loop ───────────────────────────────────────────────────────────────
+  function loop() {
+    ctx.fillStyle = 'rgb(6,8,14)';
+    ctx.fillRect(0, 0, W, H);
+
+    const t   = time * 0.001;
+    const jaw = biteOpen();              // 0 = closed, 1 = fully open
+    const maxJaw = H * 0.058;           // max vertical travel per jaw half
+
+    // Background nebulae
+    for (const [nx,ny,nr,c,op] of [
+      [W*0.15, H*0.28, Math.max(W,H)*0.30, [14,20,60],  0.08],
+      [W*0.78, H*0.62, Math.max(W,H)*0.26, [38,14,68],  0.07],
+      [W*0.38, H*0.82, Math.max(W,H)*0.24, [50,12,55],  0.06],
+    ]) {
+      const dx=Math.sin(t*0.11+nx)*W*0.06, dy=Math.cos(t*0.09+ny)*H*0.06;
+      const g=ctx.createRadialGradient(nx+dx,ny+dy,0,nx+dx,ny+dy,nr);
+      g.addColorStop(0,  `rgba(${c[0]},${c[1]},${c[2]},${op})`);
+      g.addColorStop(0.5,`rgba(${c[0]},${c[1]},${c[2]},${op*0.4})`);
+      g.addColorStop(1,  'transparent');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    }
+
+    // Eye glow
+    const ep = 0.68 + Math.sin(t*1.7)*0.12 + Math.sin(t*3.3)*0.05;
+    for (const [ex,ey] of [[W*0.33,H*0.37],[W*0.67,H*0.37]]) {
+      const erx=W*0.125, ery=H*0.076;
+      ctx.save(); ctx.translate(ex,ey); ctx.scale(1,ery/erx);
+      const halo=ctx.createRadialGradient(0,0,0,0,0,erx*1.8);
+      halo.addColorStop(0,  `rgba(180,30,0,${ep*0.40})`);
+      halo.addColorStop(0.5,`rgba(120,15,0,${ep*0.20})`);
+      halo.addColorStop(1,  'transparent');
+      ctx.fillStyle=halo; ctx.beginPath(); ctx.arc(0,0,erx*1.8,0,Math.PI*2); ctx.fill();
+      const fire=ctx.createRadialGradient(0,0,0,0,0,erx);
+      fire.addColorStop(0,  `rgba(255,160,20,${ep*0.82})`);
+      fire.addColorStop(0.20,`rgba(240,90,5,${ep*0.68})`);
+      fire.addColorStop(0.50,`rgba(185,28,3,${ep*0.44})`);
+      fire.addColorStop(0.80,`rgba(110,10,2,${ep*0.20})`);
+      fire.addColorStop(1,  'transparent');
+      ctx.fillStyle=fire; ctx.beginPath(); ctx.arc(0,0,erx,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+      // Slit pupil
+      ctx.save();
+      ctx.globalCompositeOperation='destination-out';
+      ctx.save(); ctx.translate(ex,ey); ctx.scale(0.16,1); ctx.translate(-ex,-ey);
+      const slit=ctx.createRadialGradient(ex,ey,0,ex,ey,erx*0.18);
+      slit.addColorStop(0,'rgba(0,0,0,0.95)'); slit.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=slit; ctx.beginPath(); ctx.arc(ex,ey,ery*0.92,0,Math.PI*2); ctx.fill();
+      ctx.restore(); ctx.restore();
+    }
+
+    // Cascade
+    if (time%4===0) buildGrid();
+    if (time>=nextFire) { triggerFire(); scheduleNext(); }
+
+    for (let i = 0; i < stars.length; i++) {
+      const s = stars[i];
+      if (!(s.cascadeEnergy>0.06 && s.cascadeReady)) continue;
+      s.cascadeReady=false;
+      for (const ni of neighbors(s)) {
+        if (ni===i) continue;
+        const n=stars[ni];
+        if (n.refractoryUntil>time) continue;
+        const d=Math.hypot(s.x-n.x,s.y-n.y);
+        if (d<CONN_DIST*1.5) {
+          const tr=s.cascadeEnergy*0.27*(1-d/(CONN_DIST*1.5));
+          if (tr>0.006) {
+            n.pulse=Math.min(1,n.pulse+tr*1.2);
+            n.cascadeEnergy=Math.min(0.9,n.cascadeEnergy+tr*0.75);
+            n.cascadeReady=false; n.refractoryUntil=time+REFRACT;
+            n.binaryShow=Math.min(1,n.binaryShow+0.6+tr*3);
+            n.dotOpacity=0; n.binaryDigit=Math.random()<0.5?'0':'1';
+            setTimeout(()=>{n.cascadeReady=true;},40+Math.random()*40);
+          }
+        }
+      }
+      s.cascadeEnergy*=0.65;
+    }
+
+    // Update star positions (jaw stars animated; all others static)
+    for (const s of stars) {
+      if (s.jawRole) {
+        const dir = s.jawRole==='upper' ? -1 : 1;
+        s.y = s.homeY + dir * jaw * maxJaw * s.jawW;
+        // update x for grid accuracy
+        s.x = s.homeX;
+      } else {
+        s.x = s.homeX; s.y = s.homeY;
+      }
+      s.pulse*=s.pulseDecay; s.cascadeEnergy*=0.96; s.binaryShow*=0.988;
+      if (s.binaryShow<0.3) s.dotOpacity=Math.min(1,s.dotOpacity+0.025);
+      s.size=s.baseSize+s.pulse*3.5;
+    }
+
+    // Connections
+    for (let i = 0; i < stars.length; i++) {
+      const si=stars[i];
+      if (si.x<-50||si.x>W+50||si.y<-50||si.y>H+50) continue;
+      for (let j=i+1; j<stars.length; j++) {
+        const sj=stars[j];
+        const d=Math.hypot(si.x-sj.x,si.y-sj.y);
+        if (d>=CONN_DIST) continue;
+        let a=1-d/CONN_DIST; a*=a;
+        const pm=Math.max(si.pulse,sj.pulse);
+        a=Math.min(a*(1+pm*8),0.75);
+        if (a<0.002) continue;
+        const eye=si.faceType==='eye'||si.faceType==='pupil'||sj.faceType==='eye'||sj.faceType==='pupil';
+        const r=eye?Math.round(200+pm*55):Math.round(140+pm*80);
+        const g=eye?Math.round(55+pm*30) :Math.round(155+pm*70);
+        const b=eye?Math.round(8+pm*10)  :Math.round(205+pm*40);
+        ctx.strokeStyle=`rgba(${r},${g},${b},${a*0.30})`;
+        ctx.lineWidth=0.6+pm*1.8;
+        ctx.beginPath(); ctx.moveTo(si.x,si.y); ctx.lineTo(sj.x,sj.y); ctx.stroke();
+      }
+    }
+
+    // Stars
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    for (const s of stars) {
+      if (s.x<-80||s.x>W+80||s.y<-80||s.y>H+80) continue;
+      const tw=Math.sin(time*s.twinkleSpeed+s.twinkleOffset)*0.12+0.88;
+      const p=s.pulse;
+      let tr,tg,tb;
+      if (s.faceType==='eye'||s.faceType==='pupil') {
+        tr=Math.min(255,228+p*27|0); tg=Math.min(255,95+p*50|0); tb=Math.min(255,12+p*18|0);
+      } else if (s.faceType==='tooth'||s.faceType==='tooth-lower') {
+        tr=Math.min(255,215+p*40|0); tg=Math.min(255,218+p*37|0); tb=Math.min(255,232+p*23|0);
+      } else {
+        tr=Math.min(255,185+p*55|0); tg=Math.min(255,195+p*45|0); tb=Math.min(255,218+p*30|0);
+      }
+      const clr=`rgb(${tr},${tg},${tb})`;
+
+      if (s.binaryShow>0.06) {
+        const fs=Math.max(7,s.baseSize*4.5+s.binaryShow*11+p*5);
+        ctx.font=`${fs|0}px monospace`;
+        ctx.globalAlpha=Math.min(1,s.binaryShow*1.2+p*0.2)*tw;
+        ctx.fillStyle=clr; ctx.fillText(s.binaryDigit,s.x,s.y);
+        if (s.binaryShow>0.15) {
+          const hr=fs*1.2+p*8;
+          const gg=ctx.createRadialGradient(s.x,s.y,fs*0.15,s.x,s.y,hr);
+          gg.addColorStop(0,`rgba(${tr},${tg},${tb},${Math.max(s.binaryShow,p)*0.2*tw})`);
+          gg.addColorStop(1,'transparent');
+          ctx.globalAlpha=1; ctx.fillStyle=gg;
+          ctx.beginPath(); ctx.arc(s.x,s.y,hr,0,Math.PI*2); ctx.fill();
+        }
+        if (s.dotOpacity>0.05) {
+          ctx.globalAlpha=Math.min(1,s.opacity+p*0.6)*tw*s.dotOpacity;
+          ctx.fillStyle=clr; ctx.beginPath(); ctx.arc(s.x,s.y,s.size,0,Math.PI*2); ctx.fill();
+        }
+      } else {
+        ctx.globalAlpha=Math.min(1,s.opacity+p*0.6)*tw;
+        ctx.fillStyle=clr; ctx.beginPath(); ctx.arc(s.x,s.y,s.size,0,Math.PI*2); ctx.fill();
+        if (p>0.05) {
+          const hr=s.size*4+p*10;
+          const gg=ctx.createRadialGradient(s.x,s.y,s.size*0.5,s.x,s.y,hr);
+          const ga=p*0.3*tw;
+          gg.addColorStop(0,  `rgba(${tr},${tg},${tb},${ga})`);
+          gg.addColorStop(0.4,`rgba(${tr},${tg},${tb},${ga*0.4})`);
+          gg.addColorStop(1,  'transparent');
+          ctx.globalAlpha=1; ctx.fillStyle=gg;
+          ctx.beginPath(); ctx.arc(s.x,s.y,hr,0,Math.PI*2); ctx.fill();
+        }
+      }
+    }
+
+    ctx.globalAlpha=1;
+    time++;
+    requestAnimationFrame(loop);
+  }
+
+  window.addEventListener('resize', () => { resize(); createStars(); });
+  resize(); createStars(); scheduleNext(); loop();
+})();
+</script>
+</body>
+</html>
