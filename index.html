@@ -24,18 +24,18 @@
 <!-- ===== NAVBAR ===== -->
 <nav class="site-nav" id="siteNav">
   <div class="nav-brand">
-    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <path d="M50 4 L56 40 L92 50 L56 60 L50 96 L44 60 L8 50 L44 40 Z" fill="#0a0e18" opacity="0.8"/>
-    </svg>
+    <img src="assets/images/school_logo/school_logo_black.png" alt="AstroStat School logo">
     AstroStat School
   </div>
   <ul class="nav-links">
     <li><a href="#about">About</a></li>
     <li><a href="#topics">Topics</a></li>
+    <li><a href="#schedule">Schedule</a></li>
     <li><a href="#instructors">Instructors</a></li>
     <li><a href="#venue">Venue</a></li>
+    <li><a href="#materials">Materials</a></li>
     <li><a href="#legacy">Legacy</a></li>
-    <li><a href="#sponsors">Sponsors</a></li>
+    <li><a href="#sponsors">Partners</a></li>
   </ul>
   <a href="apply.html" class="nav-apply">Apply Now</a>
 </nav>
@@ -92,7 +92,7 @@
         </div>
         <div class="about-sidebar">
           <div class="info-card"><h4>Where</h4><p>Rome, Italy</p></div>
-          <div class="info-card"><h4>When</h4><p>27—31 June 2026</p></div>
+          <div class="info-card"><h4>When</h4><p>27—31 July 2026</p></div>
           <div class="info-card"><h4>Edition</h4><p>7th Edition</p></div>
         </div>
       </div>
@@ -105,18 +105,29 @@
     <div class="sec-inner">
       <div class="sec-header reveal">
         <h2>Topics</h2>
-        <p>Five days of intensive, hands-on sessions covering the essential toolkit for data-driven astrophysics.</p>
+        <p>Your essential toolkit for modern data analysis.</p>
       </div>
       <div class="topics-grid reveal">
-        <div class="topic-chip"><h3>Classical &amp; Bayesian Statistics</h3><p>Foundational frameworks for hypothesis testing, parameter estimation, and inference.</p></div>
-        <div class="topic-chip"><h3>AI Agents</h3><p>Autonomous systems that plan, reason, and act — and how to harness them responsibly for scientific workflows.</p></div>
-        <div class="topic-chip"><h3>Deep Learning</h3><p>Neural network architectures for image recognition, signal classification, and generative modeling.</p></div>
-        <div class="topic-chip"><h3>Gaussian Processes</h3><p>Non-parametric regression for modeling uncertainty in time-series, light curves, and spectral data.</p></div>
-        <div class="topic-chip"><h3>Markov Chain Monte Carlo</h3><p>Sampling techniques for exploring complex posterior distributions in multi-parameter models.</p></div>
-        <div class="topic-chip"><h3>Simulation Based Inference</h3><p>Likelihood-free methods that leverage simulations to perform inference on intractable models.</p></div>
-        <div class="topic-chip"><h3>Machine Learning Practices</h3><p>Best practices for feature engineering, model validation, cross-validation, and reproducible pipelines.</p></div>
-        <div class="topic-chip"><h3>Clustering, Classification &amp; Regression</h3><p>Unsupervised and supervised methods for discovering structure and extracting information from complex astronomical datasets.</p></div>
-        <div class="topic-chip"><h3>GPU Parallelization</h3><p>Accelerating computations with GPU programming for large-scale data analysis and simulations.</p></div>
+        <div class="topic-chip"><h3><svg class="topic-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 13 Q4 13 5 8 Q6 2 8 2 Q10 2 11 8 Q12 13 15 13" stroke="#0a0e18" stroke-width="1.4" stroke-linecap="round"/></svg>Classical &amp; Bayesian Statistics</h3><p>Foundational frameworks for hypothesis testing, parameter estimation, and inference.</p></div>
+        <div class="topic-chip"><h3><svg class="topic-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="3" r="1.5" stroke="#0a0e18" stroke-width="1.3"/><circle cx="2.5" cy="13" r="1.5" stroke="#0a0e18" stroke-width="1.3"/><circle cx="13.5" cy="13" r="1.5" stroke="#0a0e18" stroke-width="1.3"/><line x1="8" y1="4.5" x2="2.5" y2="11.5" stroke="#0a0e18" stroke-width="1.2" stroke-linecap="round"/><line x1="8" y1="4.5" x2="13.5" y2="11.5" stroke="#0a0e18" stroke-width="1.2" stroke-linecap="round"/><line x1="2.5" y1="13" x2="13.5" y2="13" stroke="#0a0e18" stroke-width="1.2" stroke-linecap="round"/></svg>AI Agents</h3><p>Autonomous systems that plan, reason, and act — and how to harness them responsibly for scientific workflows.</p></div>
+        <div class="topic-chip"><h3><svg class="topic-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="12" height="3" rx="1" stroke="#0a0e18" stroke-width="1.3"/><rect x="2" y="6.5" width="12" height="3" rx="1" stroke="#0a0e18" stroke-width="1.3"/><rect x="2" y="11" width="12" height="3" rx="1" stroke="#0a0e18" stroke-width="1.3"/></svg>Deep Learning</h3><p>Neural network architectures for image classification, regression, and pattern recognition in astronomical data.</p></div>
+        <div class="topic-chip"><h3><svg class="topic-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 8 C3 8 3 3 5 3 C7 3 7 13 9 13 C11 13 11 8 13 8 C14 8 15 8 15 8" stroke="#0a0e18" stroke-width="1.4" stroke-linecap="round"/></svg>Gaussian Processes</h3><p>Non-parametric regression for modeling uncertainty in time-series, light curves, and spectral data.</p></div>
+        <div class="topic-chip"><h3><svg class="topic-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="1,12 4,5 7,10 10,4 13,9 15,6" stroke="#0a0e18" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Markov Chain Monte Carlo</h3><p>Sampling techniques for exploring complex posterior distributions in multi-parameter models.</p></div>
+        <div class="topic-chip"><h3><svg class="topic-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 3 L14 3 L11 8 L14 13 L2 13 L5 8 Z" stroke="#0a0e18" stroke-width="1.3" stroke-linejoin="round"/><line x1="5" y1="8" x2="11" y2="8" stroke="#0a0e18" stroke-width="1.1" stroke-linecap="round"/></svg>Simulation Based Inference</h3><p>Likelihood-free methods that leverage simulations to perform inference on intractable models.</p></div>
+        <div class="topic-chip"><h3><svg class="topic-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="6" stroke="#0a0e18" stroke-width="1.3"/><polyline points="5,8 7,10 11,6" stroke="#0a0e18" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Machine Learning Practices</h3><p>Clustering, Classification and Regression. Plus, best practices for feature engineering, model validation, cross-validation, and reproducible pipelines.</p></div>
+        <div class="topic-chip"><h3><svg class="topic-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="1" y1="13" x2="15" y2="13" stroke="#0a0e18" stroke-width="1.2" stroke-linecap="round"/><polyline points="1,10 3,10 4,6 6,11 8,4 10,9 12,7 14,9 15,9" stroke="#0a0e18" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Time Series</h3><p>An introduction to the analysis of time-ordered astronomical data, covering periodicity, variability, and common techniques for light curves and event sequences.</p></div>
+        <div class="topic-chip"><h3><svg class="topic-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="4" width="2" height="10" rx="0.5" fill="#0a0e18" opacity="0.8"/><rect x="5.5" y="6" width="2" height="8" rx="0.5" fill="#0a0e18" opacity="0.8"/><rect x="9" y="2" width="2" height="12" rx="0.5" fill="#0a0e18" opacity="0.8"/><rect x="12.5" y="5" width="2" height="9" rx="0.5" fill="#0a0e18" opacity="0.8"/></svg>GPU Parallelization</h3><p>Accelerating computations with GPU programming for large-scale data analysis and simulations.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCHEDULE -->
+  <section class="sec snap-sec" id="schedule">
+    <div class="sec-inner">
+      <div class="sec-header reveal"><h2>Schedule</h2></div>
+      <div class="reg-box reveal">
+        <p>The detailed programme will be published closer to the school date.</p>
+        <div class="reg-fee">To Be Announced</div>
       </div>
     </div>
   </section>
@@ -131,46 +142,47 @@
       <div class="instructors-label reveal">Instructors</div>
       <div class="instructors-grid reveal">
         <div class="instructor-card">
-          <div class="instructor-avatar">PB</div>
+          <div class="instructor-avatar"><img src="assets/images/instructors/Bonfini.jpg" alt="Dr. Paolo Bonfini"></div>
           <h3>Dr. Paolo Bonfini</h3>
-          <div class="inst">Alma Sistemi</div>
-          <div class="role">Leading Research Engineer. Expert in machine learning applied to astronomy, bioinformatics, and software optimization.</div>
+          <div class="inst">UniversiData srl</div>
+          <div class="role">Senior Data Scientist. Expert in AI solutions applied to astronomy, bioinformatics, and software optimization.</div>
         </div>
         <div class="instructor-card">
-          <div class="instructor-avatar">MK</div>
-          <h3>Dr. Maria Koutoulaki</h3>
-          <div class="inst">University of Leeds</div>
-          <div class="role">Researcher in star formation. Expert in near-IR spectroscopy and interferometry of young stellar objects.</div>
+          <div class="instructor-avatar"><img src="assets/images/instructors/Kovlakas.jpg" alt="Dr. Kostantinos Kovlakas"></div>
+          <h3>Dr. Kostantinos Kovlakas</h3>
+          <div class="inst">Institute of Space Sciences (CSIC, IEEC)</div>
+          <div class="role">Researcher in binary stellar evolution. Uses statistics and machine-learning tools to study observed and simulated populations of ultraluminous X-ray sources.</div>
         </div>
         <div class="instructor-card">
-          <div class="instructor-avatar">GM</div>
+          <div class="instructor-avatar"><img src="assets/images/instructors/Maravelias.png" alt="Dr. Grigoris Maravelias"></div>
           <h3>Dr. Grigoris Maravelias</h3>
-          <div class="inst">PeriAstron &amp; FORTH</div>
+          <div class="inst">PeriAstron</div>
           <div class="role">Researcher in massive stars. Uses machine-learning techniques to solve astrophysical problems.</div>
         </div>
         <div class="instructor-card">
-          <div class="instructor-avatar">AT</div>
+          <div class="instructor-avatar"><img src="assets/images/instructors/Tersenov.png" alt="Andreas Tersenov"></div>
           <h3>Andreas Tersenov</h3>
           <div class="inst">FORTH &amp; CEA Paris-Saclay</div>
           <div class="role">PhD candidate in weak lensing cosmology. Deep neural networks for cosmology.</div>
         </div>
         <div class="instructor-card">
-          <div class="instructor-avatar">GV</div>
-          <h3>Giorgos Vernardos</h3>
+          <div class="instructor-avatar"><img src="assets/images/instructors/Vasilas.jpg" alt="Nikolas Vasilas"></div>
+          <h3>Nikolas Vasilas</h3>
+          <div class="inst">Max Planck Institute for Extraterrestrial Physics</div>
+          <div class="role">PhD candidate in X-ray astrophysics and time-domain astronomy. Spectral–timing studies of AGN and compact objects, and machine learning for classification of high-energy astrophysical data.</div>
+        </div>
+        <div class="instructor-card">
+          <div class="instructor-avatar"><img src="assets/images/instructors/Vernardos.png" alt="Giorgos Vernardos"></div>
+          <h3>Prof. Giorgos Vernardos</h3>
           <div class="inst">Lehman College, CUNY &amp; AMNH</div>
           <div class="role">Ass. Professor. Data intensive problems in gravitational lensing, bayesian statistics, ML, and GPUs.</div>
         </div>
       </div>
       <div class="instructors-label reveal" style="margin-top:3rem">Teaching Assistants</div>
       <div class="ta-grid reveal">
-        <div class="ta-card"><div class="ta-avatar">CD</div><div class="ta-info"><h4>Charalampos Daoutis</h4><p>PhD Candidate &middot; Inst. of Astrophysics, FORTH</p></div></div>
-        <div class="ta-card"><div class="ta-avatar">AK</div><div class="ta-info"><h4>Avinash Kumar</h4><p>PhD Candidate &middot; Inst. of Astrophysics, FORTH</p></div></div>
-        <div class="ta-card"><div class="ta-avatar">AL</div><div class="ta-info"><h4>Arnab Lahiry</h4><p>PhD Candidate &middot; Inst. of Astrophysics, FORTH</p></div></div>
+        <!-- <div class="ta-card"><div class="ta-avatar">CD</div><div class="ta-info"><h4>Charalampos Daoutis</h4><p>PhD Candidate &middot; Inst. of Astrophysics, FORTH</p></div></div> -->
       </div>
-      <p class="reveal" style="text-align:center;font-size:0.85rem;color:rgba(10,14,24,0.4);margin-top:2rem;font-style:italic">
-        Have you attended previous editions? Would you like to be a TA?
-        <a href="#apply-section" style="color:#2a1c5a;font-weight:600;text-decoration:none">Contact us!</a>
-      </p>
+      <div class="reveal" style="background:#f0f4f8;border-top:3px solid #d4d9e2;border-radius:0 0 10px 10px;padding:0.8rem 1.3rem;margin-top:2rem;font-size:0.9rem;line-height:1.45;color:rgba(10,14,24,0.5)"><span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:rgba(10,14,24,0.35);display:block;margin-bottom:0.3rem">Join the fight against fear!</span>Have you attended previous editions of the AstroStat School? Would you like to be a Teaching Assistant? <a href="#apply-section" style="color:#2a1c5a;font-weight:600;text-decoration:none">Contact us!</a></div>
     </div>
   </section>
 
@@ -179,50 +191,99 @@
     <div class="sec-inner">
       <div class="sec-header reveal">
         <h2>Venue</h2>
-        <p>For the first time, the school moves to Rome &mdash; hosted at DotCampus in the heart of San Giovanni.</p>
+        <p>For the first time, the school moves to Rome &mdash; hosted at DotCampus in the heart of San Giovanni district.</p>
       </div>
       <div class="venue-grid reveal">
         <div class="venue-info">
           <h3>DotCampus</h3>
-          <p>A modern campus ecosystem for learning, working, and living. Located in Rome's vibrant San Giovanni district, DotCampus offers conference rooms, coworking spaces, and all the infrastructure needed for an intensive hands-on school.</p>
+          <div class="venue-address">Via Faleria, 21 &mdash; 00183 Roma RM, Italy<br>(Secondary entry through Via Sassuola)</div>
+          <p>A modern campus ecosystem for learning, working, and living. DotCampus offers conference rooms, coworking spaces, and all the infrastructure needed for an intensive hands-on school.</p>
           <div class="venue-features">
             <span class="venue-tag">Conference Rooms</span>
-            <span class="venue-tag">High-Speed WiFi</span>
             <span class="venue-tag">Coworking Areas</span>
             <span class="venue-tag">Rooftop Restaurant</span>
-            <span class="venue-tag">Fitness Center</span>
           </div>
           <h3>Accommodation</h3>
           <p>DotCampus offers on-site student rooms at competitive rates, so you can fully immerse in the school experience. The San Giovanni area also has many options via booking platforms.</p>
           <h3>Getting There</h3>
-          <p>Short walk from San Giovanni metro (Line A). Easy connections to Termini station and both Rome airports (Fiumicino &amp; Ciampino).</p>
+          <p>Short walk from San Giovanni metro (Line A). Easy connections to Termini station and Rome airports.</p>
+
+          <details class="directions-dropdown">
+            <summary class="directions-summary">Step-by-step directions &amp; transport options</summary>
+            <div class="directions-body">
+
+              <div class="directions-block">
+                <div class="directions-block-title"><svg class="dir-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="14" cy="3.2" r="1.9" fill="#0a0e18"/><path d="M11 7.5 C11 7.5 9 8.5 8.5 10" stroke="#0a0e18" stroke-width="1.5" stroke-linecap="round"/><path d="M12.5 5.5 L11 10.5 L8.5 14.5 L7 20" stroke="#0a0e18" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 10.5 L14 13.5 L16 20" stroke="#0a0e18" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 5.5 L15.5 7 L17.5 6.5" stroke="#0a0e18" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> On foot from San Giovanni Metro (Line A)</div>
+                <ol class="directions-steps">
+                  <li>Exit toward <strong>Piazzale Appio / Via Appia Nuova</strong>.</li>
+                  <li>Orient yourself along <strong>Via Appia Nuova</strong> (major shopping street).</li>
+                  <li>Turn left into <strong>Via Faleria</strong>.</li>
+                  <li>Continue straight ~200 m. Look for the DotCampus entrance (slightly hidden in a side alley).</li>
+                </ol>
+                <div class="directions-summary-line">Total: ~5 min</div>
+              </div>
+
+              <div class="directions-block">
+                <div class="directions-block-title">&#x24C2; From Termini Station</div>
+                <p class="directions-option-label">Most direct</p>
+                <ol class="directions-steps">
+                  <li>Take <strong>Metro Line A</strong> (direction Anagnina).</li>
+                  <li>Get off at <strong>San Giovanni</strong> (3 stops, ~6 min).</li>
+                  <li>Walk as above.</li>
+                </ol>
+              </div>
+
+              <div class="directions-block">
+                <div class="directions-block-title">&#x2708; From Fiumicino Airport (FCO)</div>
+                <p class="directions-option-label">Option A &mdash; fastest</p>
+                <ol class="directions-steps">
+                  <li>Take <strong>Leonardo Express</strong> train &rarr; Termini.</li>
+                  <li>Switch to <strong>Metro Line A</strong> &rarr; San Giovanni.</li>
+                  <li>Walk 5 min.</li>
+                </ol>
+                <div class="directions-summary-line">Total: ~45&ndash;60 min</div>
+                <p class="directions-option-label">Option B &mdash; cheaper</p>
+                <ol class="directions-steps">
+                  <li>Regional train <strong>FL1</strong> &rarr; Tuscolana.</li>
+                  <li>Walk ~15 min <em>or</em> take a bus to San Giovanni.</li>
+                </ol>
+              </div>
+
+              <div class="directions-block">
+                <div class="directions-block-title">&#x2708; From Ciampino Airport (CIA)</div>
+                <ol class="directions-steps">
+                  <li>Bus to <strong>Anagnina</strong> metro (Line A terminus).</li>
+                  <li>Metro Line A &rarr; <strong>San Giovanni</strong>.</li>
+                  <li>Walk 5 min.</li>
+                </ol>
+                <div class="directions-summary-line">Total: ~35&ndash;45 min</div>
+              </div>
+
+            </div>
+          </details>
         </div>
         <div class="venue-right">
+          <div class="venue-gallery">
+            <div class="venue-gallery-item"><img src="assets/images/venue/venue_1.webp" alt="DotCampus venue 1"></div>
+            <div class="venue-gallery-item"><img src="assets/images/venue/venue_2.webp" alt="DotCampus venue 2"></div>
+            <div class="venue-gallery-item"><img src="assets/images/venue/venue_3.webp" alt="DotCampus venue 3"></div>
+            <div class="venue-gallery-item"><img src="assets/images/venue/venue_4.webp" alt="DotCampus venue 4"></div>
+          </div>
           <div class="venue-map">
             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2970.5!2d12.5145!3d41.8855!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x132f61b5e1c5cfab%3A0x4e9f8c6e3e2b1a5d!2sVia%20Faleria%2C%2021%2C%2000183%20Roma%20RM%2C%20Italy!5e0!3m2!1sen!2sus!4v1709000000000" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-          </div>
-          <div class="venue-gallery">
-            <div class="venue-gallery-item">Photo 1</div>
-            <div class="venue-gallery-item">Photo 2</div>
-            <div class="venue-gallery-item">Photo 3</div>
-            <div class="venue-gallery-item">Photo 4</div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- REGISTRATION -->
-  <section class="sec snap-sec" id="registration">
+  <!-- MATERIALS -->
+  <section class="sec sec-alt snap-sec" id="materials">
     <div class="sec-inner">
-      <div class="sec-header reveal"><h2>Registration</h2></div>
+      <div class="sec-header reveal"><h2>Materials</h2></div>
       <div class="reg-box reveal">
-        <p>Due to the hands-on format, the number of seats is limited.</p>
-        <p>This year, a small registration fee applies to cover catering and on-site meals during the school week.</p>
-        <div class="reg-fee">Registration Fee: TBA</div>
-        <p class="reg-fee-note">The fee is kept minimal and only covers food &amp; catering costs.</p>
-        <p>Full registration details for the 2026 Rome edition will be announced soon.</p>
-        <a href="apply.html" class="btn-dark">Apply Now</a>
+        <p>As per Astrostat Academy's policy, all lecture notebooks and code will be made <strong>freely and publicly available</strong> on our <svg class="github-icon" viewBox="0 0 24 24" fill="#0a0e18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg><strong>GitHub</strong> — no registration required to access them.</p>
+        <div class="reg-fee">To Be Announced</div>
       </div>
     </div>
   </section>
@@ -288,10 +349,16 @@
   <section class="sec snap-sec" id="sponsors">
     <div class="sec-inner sec-wide">
       <div class="sec-header reveal">
-        <h2>Partners &amp; Sponsors</h2>
+        <h2>Organizers &amp; Sponsors</h2>
         <p>The organizations that make this school possible.</p>
       </div>
       <div class="sponsors-grid reveal">
+        <div class="sponsor-card sponsor-card--organizer">
+          <div class="sponsor-logo">AA</div>
+          <div class="sponsor-name">Astrostat Academy</div>
+          <div class="sponsor-type">Main Organizer</div>
+          <div class="sponsor-desc">The independent initiative behind the Astrostatistics School series, running intensive hands-on training in statistics and machine learning for astrophysicists since 2019.</div>
+        </div>
         <div class="sponsor-card">
           <div class="sponsor-logo">UD</div>
           <div class="sponsor-name">UniversiData</div>

@@ -7,7 +7,7 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { 
-    background: #070a12; 
+    background: #070a12;
     color: #fff; 
     font-family: 'Space Grotesk', monospace; 
     overflow: hidden; 
@@ -113,6 +113,15 @@ function drawCityDots() {
       ctx.strokeStyle = CITY_DOT_STROKE_COLOR;
       ctx.lineWidth = CITY_DOT_STROKE_WIDTH;
       ctx.stroke();
+      // Draw city name just above the beacon dot
+      ctx.font = '11px "Space Grotesk", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.strokeStyle = CITY_DOT_STROKE_COLOR;
+      ctx.lineWidth = CITY_DOT_STROKE_WIDTH;
+      ctx.strokeText(city.name, pos2d.x, pos2d.y - CITY_DOT_SIZE - 3);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(city.name, pos2d.x, pos2d.y - CITY_DOT_SIZE - 3);
     }
   });
 }
@@ -164,8 +173,7 @@ function project3D(point3d, rotX, rotY, zoom) {
   y = newY;
   
   // Apply zoom and perspective projection
-  const perspective = 1000;
-  const scale = (perspective / (perspective + z)) * zoom;
+  const scale = zoom;
   
   return {
     x: centerX + x * scale,
