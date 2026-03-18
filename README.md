@@ -2,6 +2,8 @@
 
 Static website hosted on GitHub Pages.
 
+**Live site:** https://astrostat-academy.github.io/website-school-7/
+
 ---
 
 ## Updating the acknowledgement papers
