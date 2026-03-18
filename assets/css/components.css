@@ -123,6 +123,46 @@ details[open]>.join-summary::before{transform:rotate(90deg)}
 .btn-dark{display:inline-block;padding:0.85rem 2.8rem;background:#0a0e18;color:#fff;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:0.95rem;font-weight:600;text-decoration:none;margin-top:1.5rem;transition:all 0.3s}
 .btn-dark:hover{background:#1a2030;transform:translateY(-1px)}
 
+/* ===== ACKNOWLEDGEMENTS ===== */
+.ack-layout{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:stretch}
+@media(max-width:768px){.ack-layout{grid-template-columns:1fr}}
+.ack-left{display:flex;flex-direction:column;justify-content:space-between;height:100%;padding-bottom:1.8rem}
+.ack-arrow{display:inline-block;vertical-align:middle;margin-left:0.3rem}
+.ack-arrow svg{width:28px;height:11px;animation:ack-arrow-nudge 1.6s ease-in-out infinite;display:block}
+@keyframes ack-arrow-nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(7px)}}
+.ack-intro{font-size:0.95rem;line-height:1.75;color:rgba(10,14,24,0.6);margin:0}
+.ack-outro{text-align:left !important;margin-top:auto}
+.ack-box{position:relative;padding:3rem 2rem 1.8rem;background:#f0f4f8;border-radius:16px;border-left:3px solid #2a1c5a;margin-bottom:1rem}
+.ack-text{font-size:1rem;line-height:1.75;color:rgba(10,14,24,0.65);font-style:italic;margin:0}
+.ack-text::before{content:'\201C';display:block;font-family:'Georgia',serif;font-size:4.5rem;line-height:0.7;color:#2a1c5a;opacity:0.18;margin-bottom:0.5rem;user-select:none;pointer-events:none}
+.ack-copy-btn{position:absolute;top:0.9rem;right:0.9rem;display:flex;align-items:center;gap:0.35rem;padding:0.35rem 0.7rem;background:#fff;border:1px solid rgba(10,14,24,0.12);border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:0.75rem;font-weight:600;color:rgba(10,14,24,0.45);cursor:pointer;transition:all 0.2s;box-shadow:0 2px 8px rgba(10,14,24,0.08)}
+.ack-copy-btn svg{width:13px;height:13px;flex-shrink:0}
+.ack-copy-btn:hover{background:#e6eaf0;color:#0a0e18;border-color:rgba(10,14,24,0.2)}
+.ack-copy-btn.copied{color:#2a7a2a;border-color:#2a7a2a;background:#f0fff0}
+.ack-heart{position:fixed;pointer-events:none;font-size:1.2rem;animation:ack-heart-fly 1.2s ease-out forwards;z-index:9999;color:#e53935}
+@keyframes ack-heart-fly{
+  0%  {transform:translateY(0) rotate(0deg) scale(1);   opacity:1}
+  30% {transform:translateY(-40px) rotate(-15deg) scale(1.2); opacity:1}
+  60% {transform:translateY(-90px) rotate(12deg) scale(0.9);  opacity:0.7}
+  100%{transform:translateY(-140px) rotate(-8deg) scale(0.6); opacity:0}
+}
+.ack-outro{font-size:0.95rem;line-height:1.75;color:rgba(10,14,24,0.6);text-align:center}
+.ack-link{color:#2a1c5a;text-decoration:none;font-weight:600}
+.ack-link:hover{text-decoration:underline}
+.ack-papers{margin-top:1rem;padding-top:0}
+.ack-papers-title{font-family:'Space Grotesk',sans-serif;font-size:0.7rem;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:rgba(10,14,24,0.35);margin-bottom:1.5rem}
+.ack-papers-ticker{width:100%;overflow:hidden;mask-image:linear-gradient(90deg,transparent,black 6%,black 94%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,black 6%,black 94%,transparent)}
+.ack-papers-track{display:flex;align-items:stretch;gap:1rem;min-width:max-content;animation:ack-papers-scroll 70s linear infinite}
+.ack-papers-track:hover{animation-play-state:paused}
+@keyframes ack-papers-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ack-paper-item{background:#f8f9fc;border-radius:12px;padding:1rem 1.2rem;display:flex;flex-direction:column;gap:0.2rem;border:1px solid rgba(10,14,24,0.06);transition:border-color 0.2s;width:240px;flex-shrink:0}
+.ack-paper-item:hover{border-color:rgba(42,28,90,0.25)}
+.ack-paper-authors{font-size:0.78rem;font-weight:600;color:rgba(10,14,24,0.4);font-family:'Space Grotesk',sans-serif}
+.ack-paper-title{font-size:0.88rem;line-height:1.4;color:#2a1c5a;text-decoration:none;font-weight:500}
+.ack-paper-title:hover{text-decoration:underline}
+.ack-paper-pub{font-size:0.75rem;color:rgba(10,14,24,0.35);font-style:italic;margin-top:0.1rem}
+.ack-papers-loading,.ack-papers-empty{font-size:0.9rem;color:rgba(10,14,24,0.4);font-style:italic}
+
 /* ===== LEGACY ===== */
 #legacy .sec-header{margin-bottom:1rem}
 .legacy-htimeline{width:100%;overflow:hidden;margin-bottom:2rem;mask-image:linear-gradient(90deg,transparent,black 8%,black 92%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,black 8%,black 92%,transparent)}
