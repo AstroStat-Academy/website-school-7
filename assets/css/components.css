@@ -244,8 +244,8 @@ details[open]>.join-summary::before{transform:rotate(90deg)}
 .form-group select{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(255,255,255,0.4)' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center}
 .form-group select option{background:#0a0e18;color:#fff}
 .form-group textarea{resize:vertical;min-height:80px}
-.btn-submit{display:block;width:100%;padding:1rem;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.92);border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.4s;backdrop-filter:blur(10px);letter-spacing:0.02em;margin-top:1.5rem}
-.btn-submit:hover{background:rgba(255,255,255,0.18);border-color:rgba(255,255,255,0.3);transform:translateY(-1px)}
+.btn-submit{display:block;width:100%;padding:1rem;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.82);border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.4s;backdrop-filter:blur(4px);letter-spacing:0.02em;margin-top:1.5rem}
+.btn-submit:hover{background:rgba(255,255,255,0.11);border-color:rgba(255,255,255,0.2);transform:translateY(-1px)}
 .footer-contact{display:flex;justify-content:center;gap:2.5rem;margin-top:2rem;flex-wrap:wrap}
 .footer-contact a{font-size:0.8rem;color:rgba(255,255,255,0.4);text-decoration:none;transition:color 0.3s}
 .footer-contact a:hover{color:rgba(255,255,255,0.8)}
