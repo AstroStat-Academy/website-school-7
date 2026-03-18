@@ -36,7 +36,7 @@
     <li><a href="#materials">Materials</a></li>
     <li><a href="#legacy">Legacy</a></li>
     <li><a href="#acknowledgements">Acknowledgements</a></li>
-    <li><a href="#sponsors">Partners</a></li>
+    <li><a href="#sponsors">Partners &amp; Contact</a></li>
   </ul>
   <a href="apply.html" class="nav-apply">Apply Now</a>
 </nav>
@@ -437,41 +437,73 @@
   <section class="sec snap-sec" id="sponsors">
     <div class="sec-inner sec-wide">
       <div class="sec-header reveal">
-        <h2>Organizers &amp; Sponsors</h2>
+        <h2>Partners</h2>
         <p>The organizations that make this school possible.</p>
+        <p class="partners-contact">Contact: astrostatacademy (at) gmail.com</p>
       </div>
       <div class="sponsors-grid reveal">
-        <div class="sponsor-card sponsor-card--organizer">
-          <div class="sponsor-logo">AA</div>
-          <div class="sponsor-name">Astrostat Academy</div>
-          <div class="sponsor-type">Main Organizer</div>
-          <div class="sponsor-desc">The independent initiative behind the Astrostatistics School series, running intensive hands-on training in statistics and machine learning for astrophysicists since 2019.</div>
+        <div class="sponsor-card sponsor-card--organizer flip-card" data-flip-delay="0">
+          <div class="flip-inner">
+            <div class="flip-front">
+              <img src="assets/images/sponsors/logo_w_text_lowres.png" alt="Astrostat Academy logo">
+            </div>
+            <div class="flip-back">
+              <div class="sponsor-name">Astrostat Academy</div>
+              <div class="sponsor-type">Main Organizer</div>
+              <div class="flip-back-desc">Intensive hands-on training in statistics and machine learning for astrophysicists since 2019.</div>
+            </div>
+          </div>
         </div>
-        <div class="sponsor-card">
-          <div class="sponsor-logo">UD</div>
-          <div class="sponsor-name">UniversiData</div>
-          <div class="sponsor-type">Organizing Partner</div>
-          <div class="sponsor-desc">EdTech company with a strong AI core. Part of Ingenium Group, powering education through technology.</div>
+        <div class="sponsors-row">
+        <div class="sponsor-card flip-card" data-flip-delay="1">
+          <div class="flip-inner">
+            <div class="flip-front">
+              <img src="assets/images/sponsors/logo UniversiData_ver_white.png" alt="UniversiData logo">
+            </div>
+            <div class="flip-back">
+              <div class="sponsor-name">UniversiData</div>
+              <div class="sponsor-type">Organizing Partner</div>
+              <div class="flip-back-desc">EdTech company with a strong AI core, powering education through technology.</div>
+            </div>
+          </div>
         </div>
-        <div class="sponsor-card">
-          <div class="sponsor-logo">DC</div>
-          <div class="sponsor-name">DotCampus</div>
-          <div class="sponsor-type">Venue Partner</div>
-          <div class="sponsor-desc">Modern campus ecosystem in Rome offering accommodation, coworking, and event spaces.</div>
+        <div class="sponsor-card flip-card" data-flip-delay="2">
+          <div class="flip-inner">
+            <div class="flip-front">
+              <img src="assets/images/sponsors/logo_dotcampus.png" alt="DotCampus logo">
+            </div>
+            <div class="flip-back">
+              <div class="sponsor-name">DotCampus</div>
+              <div class="sponsor-type">Venue Partner</div>
+              <div class="flip-back-desc">Modern campus in Rome offering accommodation, coworking, and event spaces.</div>
+            </div>
+          </div>
         </div>
-
-        <div class="sponsor-card">
-          <div class="sponsor-logo">PA</div>
-          <div class="sponsor-name">PeriAstron</div>
-          <div class="sponsor-type">Research Partner</div>
-          <div class="sponsor-desc">Research initiative focused on massive stars, X-ray binaries, and machine learning in astrophysics.</div>
+        <div class="sponsor-card flip-card" data-flip-delay="3">
+          <div class="flip-inner">
+            <div class="flip-front">
+              <img src="assets/images/sponsors/logo_Periastron.png" alt="PeriAstron logo">
+            </div>
+            <div class="flip-back">
+              <div class="sponsor-name">PeriAstron</div>
+              <div class="sponsor-type">Teaching Partner</div>
+              <div class="flip-back-desc">Non-profit advancing astronomy education, research, and outreach.</div>
+            </div>
+          </div>
         </div>
-        <div class="sponsor-card">
-          <div class="sponsor-logo">TT</div>
-          <div class="sponsor-name">Titan</div>
-          <div class="sponsor-type">Technology Partner</div>
-          <div class="sponsor-desc">High-performance computing infrastructure enabling GPU-accelerated scientific computations.</div>
+        <div class="sponsor-card flip-card" data-flip-delay="4">
+          <div class="flip-inner">
+            <div class="flip-front">
+              <img src="assets/images/sponsors/logo_Titan.png" alt="Titan logo">
+            </div>
+            <div class="flip-back">
+              <div class="sponsor-name">Titan</div>
+              <div class="sponsor-type">Technology Partner</div>
+              <div class="flip-back-desc">ERA Chair applying machine learning and data science to computational astrophysics.</div>
+            </div>
+          </div>
         </div>
+        </div><!-- /.sponsors-row -->
       </div>
     </div>
   </section>
@@ -519,6 +551,25 @@
 <script src="assets/js/canvas_mouth.js"></script>
 <script src="assets/js/main.js"></script>
 <script>
+// Sponsor card async flip
+(function() {
+  function scheduleFlip(card) {
+    const delay = 3000 + Math.random() * 5000;
+    card._flipTimeout = setTimeout(function() {
+      if (!card.matches(':hover')) {
+        card.classList.toggle('flipped');
+      }
+      scheduleFlip(card);
+    }, delay);
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.flip-card');
+    cards.forEach(function(card, i) {
+      setTimeout(function() { scheduleFlip(card); }, i * 800 + Math.random() * 1200);
+    });
+  });
+})();
+
 const contactData = {
   'Aspiring Teaching Assistant': {
     subject: 'Aspiring Teaching Assistant',

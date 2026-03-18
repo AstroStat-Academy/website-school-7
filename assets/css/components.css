@@ -204,23 +204,27 @@ details[open]>.join-summary::before{transform:rotate(90deg)}
 .material-link .mat-text a:hover{text-decoration:underline}
 
 /* ===== SPONSORS ===== */
-.sponsors-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;width:100%}
-.sponsor-card{position:relative;border-radius:14px;background:#f0f4f8;border:none;padding:2rem 1.2rem;text-align:center;transition:all 0.4s;cursor:default;overflow:hidden;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.sponsor-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,#0a0e18,#1a1840);opacity:0;transition:opacity 0.4s;border-radius:14px}
-.sponsor-card--organizer{background:linear-gradient(135deg,#f0eef8,#e8e4f4);border:1px solid rgba(90,45,138,0.15);grid-column:1/-1}
-.sponsor-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(10,14,24,0.1)}
-.sponsor-card:hover::before{opacity:1}
-.sponsor-card *{position:relative;z-index:1}
-.sponsor-logo{width:56px;height:56px;border-radius:12px;background:rgba(10,14,24,0.06);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:0.65rem;font-weight:700;color:rgba(10,14,24,0.3);letter-spacing:0.05em;transition:all 0.4s;margin-bottom:0.8rem}
-.sponsor-card:hover .sponsor-logo{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.5)}
-.sponsor-name{font-family:'Space Grotesk',sans-serif;font-size:0.88rem;font-weight:600;color:#0a0e18;transition:color 0.4s}
-.sponsor-card:hover .sponsor-name{color:#fff}
-.sponsor-type{font-size:0.68rem;color:rgba(10,14,24,0.35);text-transform:uppercase;letter-spacing:0.1em;margin-top:0.2rem;transition:color 0.4s}
-.sponsor-card:hover .sponsor-type{color:rgba(255,255,255,0.4)}
-.sponsor-desc{font-size:0.78rem;color:rgba(255,255,255,0.6);line-height:1.5;margin-top:0.8rem;max-height:0;overflow:hidden;opacity:0;transition:all 0.4s}
-.sponsor-card:hover .sponsor-desc{max-height:100px;opacity:1}
+.sponsors-grid{display:flex;flex-direction:column;align-items:center;gap:1rem;width:100%}
+.sponsors-row{display:flex;flex-wrap:wrap;justify-content:center;gap:1rem}
+.sponsors-row .sponsor-card{width:160px;flex:0 0 160px}
+.sponsor-card{perspective:800px;border-radius:14px;min-height:180px;cursor:default}
+.sponsor-card--organizer{width:calc(4 * 160px + 3 * 1rem)}
+.flip-card{perspective:800px}
+.flip-inner{position:relative;width:100%;height:100%;min-height:180px;transform-style:preserve-3d;transition:transform 0.7s cubic-bezier(0.4,0.2,0.2,1);border-radius:14px}
+.flip-card.flipped .flip-inner{transform:rotateY(180deg)}
+.flip-front,.flip-back{position:absolute;inset:0;border-radius:14px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.2rem;text-align:center}
+.flip-front{background:linear-gradient(135deg,#0a0e18,#1a1840)}
+.sponsor-card--organizer .flip-front{background:linear-gradient(135deg,#0a0e18,#1a1840)}
+.flip-front img{max-width:80%;max-height:100px;object-fit:contain}
+.flip-back{background:#f0f4f8;transform:rotateY(180deg)}
+.sponsor-card--organizer .flip-back{background:linear-gradient(135deg,#f0eef8,#e8e4f4);border:1px solid rgba(90,45,138,0.15)}
+.flip-back-label{font-family:'Space Grotesk',sans-serif;font-size:2.5rem;font-weight:700;color:rgba(10,14,24,0.1);line-height:1}
+.flip-back-desc{font-size:0.72rem;color:rgba(10,14,24,0.5);line-height:1.5;margin-top:0.6rem;padding:0 0.2rem}
+.sponsor-name{font-family:'Space Grotesk',sans-serif;font-size:0.88rem;font-weight:600;color:#0a0e18}
+.sponsor-type{font-size:0.68rem;color:rgba(10,14,24,0.35);text-transform:uppercase;letter-spacing:0.1em;margin-top:0.2rem}
 
 /* ===== APPLY FOOTER ===== */
+.partners-contact{margin-top:0.5rem;font-size:0.82rem;color:rgba(255,255,255,0.4)}
 .apply-footer.sec{position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:4rem 2rem;background:transparent !important}
 .apply-footer .sec-inner{position:relative;z-index:2;max-width:560px}
 .apply-footer h2{font-family:'Space Grotesk',sans-serif;font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:700;color:rgba(255,255,255,0.92);letter-spacing:-0.03em}
