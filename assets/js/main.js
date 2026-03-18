@@ -39,14 +39,6 @@
       AstroCanvas.startTransition();
     });
 
-    // ===== APPLY NOW BUTTONS =====
-    document.querySelectorAll('a[href="apply.html"]').forEach(function (el) {
-      el.addEventListener('click', function (e) {
-        e.preventDefault();
-        AstroCanvas.startPageTransition('apply.html');
-      });
-    });
-
     // ===== FOOTER CANVAS REACTIVATION =====
     const applyFooter = document.getElementById('apply-section');
     const contentDiv  = document.getElementById('content');

@@ -20,7 +20,6 @@
   let footerVisible = false;
   let transitioning = false, transitionScrolled = false;
   let transitionStart = 0;
-  let navigateUrl = null;
   let shockwave = null;
   const TRANSITION_DURATION = 180;   // frames for the white-flash reveal (triggered by startTransition)
 
@@ -326,20 +325,16 @@
       if (transProgress >= 0.95 && !transitionScrolled) {
         transitionScrolled = true;
         whiteFlashEl.style.opacity = '1';
-        if (navigateUrl) {
-          setTimeout(function () { window.location.href = navigateUrl; }, 300);
-        } else {
-          document.body.classList.remove('locked');
-          document.body.classList.add('unlocked');
-          heroEl.style.display   = 'none';
-          canvas.style.display   = 'none';
-          window.scrollTo({ top: 0, behavior: 'instant' });
-          contentEl.classList.add('visible');
-          navEl.classList.add('visible');
-          sideDotsEl.classList.add('visible');
-          whiteFlashEl.style.transition = 'opacity 1.5s ease';
-          whiteFlashEl.style.opacity    = '0';
-        }
+        document.body.classList.remove('locked');
+        document.body.classList.add('unlocked');
+        heroEl.style.display   = 'none';
+        canvas.style.display   = 'none';
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        contentEl.classList.add('visible');
+        navEl.classList.add('visible');
+        sideDotsEl.classList.add('visible');
+        whiteFlashEl.style.transition = 'opacity 1.5s ease';
+        whiteFlashEl.style.opacity    = '0';
       }
     }
 
@@ -637,24 +632,14 @@
       heroEl.style.opacity    = '0';
     },
 
-    startPageTransition: function (url) {
-      if (transitioning) return;
-      navigateUrl     = url;
-      transitioning   = true;
-      transitionStart = time;
-      shockwave = { startTime: time, cx: W / 2, cy: H / 2 };
-    },
-
     enableFooter: function () {
       footerVisible = true;
       canvas.style.display = 'block';
       resize();
       createStars();
-      // Morph already done — show face immediately with bite active
-      state = 'face';
-      morphStart = time - MORPH_DUR;
-      biteStartTime = time;
+      state = 'idle'; biteStartTime = -1;
       scheduleNext();
+      setTimeout(startMorph, AUTO_START_DELAY * 1000);
     },
 
     disableFooter: function () {
