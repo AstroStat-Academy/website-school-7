@@ -12,7 +12,8 @@
     // --- Lock scroll on landing ---
     document.body.classList.add('locked');
 
-    // --- Boot canvas ---
+    // --- Boot canvases ---
+    FooterCanvas.init(document.getElementById('footer-c'));
     AstroCanvas.init({
       canvas:     document.getElementById('c'),
       whiteFlash: document.getElementById('whiteFlash'),
@@ -39,7 +40,7 @@
       AstroCanvas.startTransition();
     });
 
-    // ===== FOOTER CANVAS REACTIVATION =====
+    // ===== FOOTER DARK-MODE NAV =====
     const applyFooter = document.getElementById('apply-section');
     const contentDiv  = document.getElementById('content');
     const siteNav     = document.getElementById('siteNav');
@@ -47,10 +48,8 @@
     const footerObs = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
-          AstroCanvas.enableFooter();
           siteNav.classList.add('dark-mode');
         } else {
-          AstroCanvas.disableFooter();
           siteNav.classList.remove('dark-mode');
         }
       });
