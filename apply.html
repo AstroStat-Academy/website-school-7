@@ -98,10 +98,7 @@
 
     <div style="background:rgba(255,255,255,0.04);border-top:2px solid rgba(124,111,205,0.35);border-radius:0 0 10px 10px;padding:0.8rem 1.3rem;margin-top:0.75rem;font-size:0.9rem;line-height:1.45;color:rgba(255,255,255,0.65);text-align:left"><span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#fff;display:block;margin-bottom:0.3rem">Registration Fee</span>We aim to keep the contibution as low as possible, strictly to cover essential costs, with instructors receiving no profit. Alas, a participation fee is required.<br><br>The rates are as follows:<ul style="margin:0.5rem 0 0.5rem 1.2rem;padding:0"><li>Students and PhD candidates: <strong style="color:rgba(255,255,255,0.85)">€250</strong></li><li>Postdoctoral researchers and above: <strong style="color:rgba(255,255,255,0.85)">€350</strong></li></ul>Selected applicants will receive payment instructions in the notification email. Registration is confirmed only upon receipt of the payment.</div>
 
-    <form class="apply-form" id="applyForm" action="https://docs.google.com/forms/d/e/1FAIpQLSf4JiZHUq4kG03sDcaVvtZVZbH5tEY67LANIs0yCBwgzDUNxQ/formResponse" method="POST" target="hidden_iframe" onsubmit="handleSubmit()">
-
-      <input type="hidden" name="fvv" value="1">
-      <input type="hidden" name="pageHistory" value="0">
+    <form class="apply-form" id="applyForm" onsubmit="handleSubmit(event)">
 
       <!-- Name -->
       <div class="form-row">
@@ -215,16 +212,26 @@
   <p style="color:rgba(255,255,255,0.45);font-size:0.9rem">Thank you for applying. We will be in touch in early May.</p>
 </div>
 
-<iframe name="hidden_iframe" id="hidden_iframe" style="display:none"></iframe>
 <script>
-function handleSubmit() {
+  function handleSubmit(e) {
+    e.preventDefault();
     var form = document.getElementById('applyForm');
-    form.querySelector('.btn-submit').textContent = 'Submitting…';
-    form.querySelector('.btn-submit').disabled = true;
-    document.getElementById('hidden_iframe').addEventListener('load', function() {
+    var btn = form.querySelector('.btn-submit');
+    btn.textContent = 'Submitting…';
+    btn.disabled = true;
+
+    fetch('https://script.google.com/macros/s/AKfycbzE5glgAe_VakzKkq6YbRgeO2ichvifuQMU4dZpV7EJj-S3MT1W2f7mt200l8Hv9Qi2/exec', {
+      method: 'POST',
+      mode: 'no-cors',
+      body: new FormData(form)
+    }).then(function() {
       form.style.display = 'none';
       document.getElementById('submitConfirm').style.display = 'block';
-    }, { once: true });
+    }).catch(function() {
+      btn.textContent = 'Submit Application';
+      btn.disabled = false;
+      alert('Something went wrong, please try again.');
+    });
   }
 </script>
 </body>
