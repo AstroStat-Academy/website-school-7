@@ -30,7 +30,7 @@
   const TRANSITION_DURATION = 180;
   const MOUSE_RADIUS = 110;
   const MOUSE_REPULSION = 0.3;
-  const CONN_DIST = 140;
+  let connDist = 140;          // scaled in resize()
   const DRIFT_BACK = 0.003;
   const STAR_GRAVITY_RADIUS = 100;
   const STAR_GRAVITY_STRENGTH = 0.0008;
@@ -81,17 +81,21 @@
     H = canvasEl.height = window.innerHeight;
     cx = W / 2;
     cy = H / 2;
+    // Keep connection distance ~10% of viewport width so the web doesn't
+    // dominate on narrow mobile screens (fixed 140px would be 36% on 390px)
+    connDist = Math.min(140, Math.round(W * 0.13));
   }
 
   function createStars() {
     stars = [];
-    const count = Math.floor((W * H) / 3600);
+    const count = Math.floor((W * H) / 5000);
     for (let i = 0; i < count; i++) {
       const x = Math.random() * W, y = Math.random() * H;
       const dx = x - cx, dy = y - cy;
       const dist = Math.sqrt(dx * dx + dy * dy);
       const angle = Math.atan2(dy, dx);
-      const baseSize = Math.random() * 2.2 + 0.6;
+      const sizeScale = W < 768 ? 0.65 : 1;
+      const baseSize = (Math.random() * 2.2 + 0.6) * sizeScale;
       const charge = Math.random() < 0.3 ? -(Math.random() * 0.5 + 0.5) : (Math.random() * 0.8 + 0.2);
       stars.push({
         angle, dist, homeDist: dist, x, y, vx: 0, vy: 0,
@@ -127,7 +131,7 @@
       for (const o of stars) {
         if (o === s) continue;
         const d = Math.sqrt((s.x - o.x) ** 2 + (s.y - o.y) ** 2);
-        if (d < CONN_DIST * 1.6) n++;
+        if (d < connDist * 1.6) n++;
         if (n >= 2) return true;
       }
       return false;
@@ -249,8 +253,8 @@
             const n = stars[j];
             if (n.refractoryUntil > time) continue;
             const dx = s.x - n.x, dy = s.y - n.y, d = Math.sqrt(dx * dx + dy * dy);
-            if (d < CONN_DIST * 1.6) {
-              const transfer = s.cascadeEnergy * 0.27 * (1 - d / (CONN_DIST * 1.6));
+            if (d < connDist * 1.6) {
+              const transfer = s.cascadeEnergy * 0.27 * (1 - d / (connDist * 1.6));
               if (transfer > 0.006) {
                 n.pulse = Math.min(1, n.pulse + transfer * 1.2);
                 n.cascadeEnergy = Math.min(0.9, n.cascadeEnergy + transfer * 0.75);
@@ -346,13 +350,13 @@
         for (let j = i + 1; j < stars.length; j++) {
           const sj = stars[j], dx = si.x - sj.x, dy = si.y - sj.y;
           const d = Math.sqrt(dx * dx + dy * dy);
-          if (d < CONN_DIST) {
-            let a = 1 - d / CONN_DIST; a *= a;
+          if (d < connDist) {
+            let a = 1 - d / connDist; a *= a;
             const pm = Math.max(si.pulse, sj.pulse); a = Math.min(a * (1 + pm * 8), 0.75);
             if (a < 0.002) continue;
             const r = Math.round(140 + pm * 80), g = Math.round(155 + pm * 70), b = Math.round(205 + pm * 40);
             ctx.strokeStyle = `rgba(${r},${g},${b},${a * 0.28 * connAlpha})`;
-            ctx.lineWidth = 0.6 + pm * 1.8;
+            ctx.lineWidth = (0.6 + pm * 1.8) * (W < 768 ? 0.5 : 1);
             ctx.beginPath(); ctx.moveTo(si.x, si.y); ctx.lineTo(sj.x, sj.y); ctx.stroke();
           }
         }

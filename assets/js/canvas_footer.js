@@ -18,6 +18,7 @@
   let time = 0, stars = [];
   let visible = false;
   let animating = false;
+  const isMobile = ('ontouchstart' in window || navigator.maxTouchPoints > 0) && window.innerWidth < 1024;
 
   // ── Bite animation — active from frame 0 ──────────────────────────────────────
   let biteStartTime = 0;
@@ -139,8 +140,10 @@
 
   // ── Resize ────────────────────────────────────────────────────────────────────
   function resize() {
-    W = canvas.width  = window.innerWidth;
-    H = canvas.height = window.innerHeight;
+    W = canvas.width  = document.documentElement.clientWidth;
+    H = canvas.height = document.documentElement.clientHeight;
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
     cx = W / 2; cy = H / 2;
     maxDist = Math.sqrt(cx * cx + cy * cy);
   }
@@ -447,7 +450,7 @@
 
     ctx.globalAlpha = 1;
     time++;
-    requestAnimationFrame(loop);
+    if (!isMobile) requestAnimationFrame(loop);
   }
 
   // ── Public API ────────────────────────────────────────────────────────────────
@@ -477,6 +480,7 @@
         createStars();
         biteStartTime = time;  // reset bite phase after rebuild
         scheduleNext();
+        if (isMobile) loop();
       });
 
       // Show/hide based on #apply-section visibility

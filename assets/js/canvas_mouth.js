@@ -19,6 +19,7 @@
   let time = 0, stars = [];
   let footerVisible = false;
   let transitioning = false, transitionScrolled = false;
+  const isMobile = ('ontouchstart' in window || navigator.maxTouchPoints > 0) && window.innerWidth < 1024;
   let transitionStart = 0;
   let shockwave = null;
   const TRANSITION_DURATION = 180;   // frames for the white-flash reveal (triggered by startTransition)
@@ -121,7 +122,7 @@
     }
 
     // Gum lines
-    for (let i = 0; i <= 22; i++) {
+    for (let i = 0; i <= 5; i++) {
       const tx = i / 22, x = ML + tx * (MR - ML);
       pts.push({ x, y: qby(tx, UGcY, UGctY, UGcY), type: 'gum',       jawRole: 'upper', jawW: w(x) });
       pts.push({ x, y: qby(tx, LGcY, LGctY, LGcY), type: 'gum-lower', jawRole: 'lower', jawW: w(x) });
@@ -160,8 +161,10 @@
 
   // ── Resize ────────────────────────────────────────────────────────────────────
   function resize() {
-    W = canvas.width  = window.innerWidth;
-    H = canvas.height = window.innerHeight;
+    W = canvas.width  = document.documentElement.clientWidth;
+    H = canvas.height = document.documentElement.clientHeight;
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
     cx = W / 2; cy = H / 2;
     maxDist = Math.sqrt(cx * cx + cy * cy);
   }
@@ -359,7 +362,7 @@
       for (const [nx, ny, nr, c, op] of NEBULAE) {
         const px = (nx + Math.sin(t * 0.11 + nx * 7) * 0.06) * W;
         const py = (ny + Math.cos(t * 0.09 + ny * 9) * 0.06) * H;
-        const r  = nr * Math.max(W, H);
+        const r  = nr * (isMobile ? Math.min(W, H) : Math.max(W, H));
         const g  = ctx.createRadialGradient(px, py, 0, px, py, r);
         g.addColorStop(0,   `rgba(${c[0]},${c[1]},${c[2]},${op})`);
         g.addColorStop(0.5, `rgba(${c[0]},${c[1]},${c[2]},${op * 0.4})`);
@@ -594,7 +597,7 @@
 
     ctx.globalAlpha = 1;
     time++;
-    requestAnimationFrame(loop);
+    if (!isMobile) requestAnimationFrame(loop);
   }
 
   // ── Public API ────────────────────────────────────────────────────────────────
@@ -612,15 +615,19 @@
       document.addEventListener('click', onBackgroundClick);
       window.addEventListener('resize', () => {
         resize(); createStars();
-        state = 'idle'; biteStartTime = -1;
-        setTimeout(startMorph, AUTO_START_DELAY * 1000);
+        if (isMobile) { state = 'face'; biteStartTime = 0; loop(); }
+        else { state = 'idle'; biteStartTime = -1; setTimeout(startMorph, AUTO_START_DELAY * 1000); }
       });
 
       resize();
       createStars();
-      scheduleNext();
-      setTimeout(startMorph, AUTO_START_DELAY * 1000);
-      loop();
+      if (isMobile) {
+        state = 'face'; biteStartTime = 0;
+        requestAnimationFrame(() => { resize(); createStars(); loop(); });
+      } else {
+        scheduleNext(); setTimeout(startMorph, AUTO_START_DELAY * 1000);
+        loop();
+      }
     },
 
     startTransition: function () {
@@ -637,9 +644,8 @@
       canvas.style.display = 'block';
       resize();
       createStars();
-      state = 'idle'; biteStartTime = -1;
-      scheduleNext();
-      setTimeout(startMorph, AUTO_START_DELAY * 1000);
+      if (isMobile) { state = 'face'; biteStartTime = 0; loop(); }
+      else { state = 'idle'; biteStartTime = -1; scheduleNext(); setTimeout(startMorph, AUTO_START_DELAY * 1000); }
     },
 
     disableFooter: function () {
