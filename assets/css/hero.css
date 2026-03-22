@@ -32,8 +32,8 @@
 .tagline .tword:nth-child(12){animation-delay:9.48s}
 .edition-info{font-size:0.95rem;font-weight:400;color:rgba(255,255,255,0.78);letter-spacing:0.15em;text-transform:uppercase;margin-top:1.6rem;opacity:0;animation:fadeIn 1s ease 3.5s forwards;text-shadow:0 0 3px rgb(7,10,18),0 0 3px rgb(7,10,18),0 0 6px rgb(7,10,18),0 0 6px rgb(7,10,18),0 0 12px rgb(7,10,18),0 0 12px rgb(7,10,18),0 0 24px rgb(7,10,18),0 0 24px rgb(7,10,18),0 0 48px rgb(7,10,18),0 0 80px rgb(7,10,18)}
 .cta-row{display:flex;gap:1rem;margin-top:2.2rem;opacity:0;animation:fadeIn 1s ease 10.8s forwards}
-.btn-primary{padding:0.85rem 2.8rem;background:rgba(255,255,255,0.09);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.9);border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;text-decoration:none;transition:all 0.4s;backdrop-filter:blur(8px);letter-spacing:0.02em}
-.btn-primary:hover{background:rgba(255,255,255,0.11);border-color:rgba(255,255,255,0.20);color:#fff;transform:translateY(-1px)}
+.btn-primary{padding:0.85rem 2.8rem;background:rgba(0, 0, 0, 0.5);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.82);border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;text-decoration:none;transition:all 0.4s;backdrop-filter:blur(4px);letter-spacing:0.02em}
+.btn-primary:hover{background:rgba(255,255,255,0.11);border-color:rgba(255,255,255,0.2);color:#fff;transform:translateY(-1px)}
 .meta{position:absolute;bottom:2.5rem;display:flex;gap:3.5rem;opacity:0;animation:fadeIn 1s ease 4.2s forwards}
 .hero-sponsors{position:absolute;bottom:2.5rem;right:2rem;display:flex;align-items:center;gap:1.2rem;opacity:0;animation:fadeIn 1s ease 4.9s forwards}
 .hero-sponsors img{height:40px;width:auto;object-fit:contain}

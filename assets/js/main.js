@@ -99,6 +99,32 @@
       statsObs.observe(statsRow);
     }
 
+    // ===== ANIMATED COUNTERS (legacy stats) =====
+    let legacyCountersDone = false;
+    const legacySection = document.getElementById('legacy');
+    if (legacySection) {
+      const legacyStatsObs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting && !legacyCountersDone) {
+            legacyCountersDone = true;
+            document.querySelectorAll('.stat-number-sm').forEach(function (el) {
+              const target = parseInt(el.dataset.target);
+              const duration = 1500;
+              const start = performance.now();
+              function tick(now) {
+                const p = Math.min((now - start) / duration, 1);
+                const eased = 1 - Math.pow(1 - p, 3);
+                el.textContent = Math.round(target * eased) + (target > 10 ? '+' : '');
+                if (p < 1) requestAnimationFrame(tick);
+              }
+              requestAnimationFrame(tick);
+            });
+          }
+        });
+      }, { threshold: 0.3 });
+      legacyStatsObs.observe(legacySection);
+    }
+
     // ===== SIDE NAVIGATION DOTS =====
     const sections      = document.querySelectorAll('.content-section .snap-sec');
     const dotsContainer = document.getElementById('sideDots');
