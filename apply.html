@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Apply — AstroStat School Rome 2026</title>
+  <link rel="icon" type="image/png" href="assets/images/school_logo/school_logo_white.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -146,7 +147,8 @@
         <div class="form-group full">
           <label for="motivation">Motivation Statement <span class="req">*</span></label>
           <p class="form-hint" style="margin-bottom:0.6rem">Provide a concise statement explaining your motivation for attending the AstroStat School and how it will support your academic or research work. The selection process prioritizes demonstrated need, so this section should be treated as the most important component of your application.</p>
-          <textarea id="motivation" name="entry.1115227041" rows="5" placeholder="(MAX 850 characters, use ChatGPT at your own risk)" required></textarea>
+          <textarea id="motivation" name="entry.1115227041" rows="5" placeholder="min: 200, max: 850 characters — use ChatGPT at your own risk ..." required></textarea>
+          <p id="motivationWarning" style="display:none;color:rgba(255,100,100,0.85);font-size:0.82rem;margin-top:0.4rem">Please write at least 200 characters (currently <span id="motivationCount">0</span>).</p>
         </div>
       </div>
 
@@ -236,6 +238,15 @@
     if (e.target.type === 'radio') {
       var scaleGroup = e.target.closest('.scale-group');
       if (scaleGroup) scaleGroup.classList.remove('field-error-group');
+    } else if (e.target.id === 'motivation') {
+      var len = e.target.value.length;
+      document.getElementById('motivationCount').textContent = len;
+      if (len >= 200) {
+        e.target.classList.remove('field-error');
+        document.getElementById('motivationWarning').style.display = 'none';
+      } else if (e.target.classList.contains('field-error')) {
+        document.getElementById('motivationWarning').style.display = 'block';
+      }
     } else if (e.target.classList.contains('field-error') && e.target.value.trim()) {
       e.target.classList.remove('field-error');
       // If one email field is corrected, re-check match and clear the other if they now match
@@ -263,6 +274,18 @@
         valid = false;
       }
     });
+
+    // Validate motivation minimum length
+    var motivationEl = document.getElementById('motivation');
+    var motivationWarning = document.getElementById('motivationWarning');
+    if (motivationEl.value.length < 200) {
+      motivationEl.classList.add('field-error');
+      document.getElementById('motivationCount').textContent = motivationEl.value.length;
+      motivationWarning.style.display = 'block';
+      valid = false;
+    } else {
+      motivationWarning.style.display = 'none';
+    }
 
     // Validate email match
     var emailEl = document.getElementById('email');
