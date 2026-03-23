@@ -38,14 +38,7 @@
     document.getElementById('exploreBtn').addEventListener('click', function (e) {
       e.preventDefault();
       if (window.innerWidth < 769) {
-        // Mobile: skip heavy canvas animation, reveal content directly
-        document.body.classList.remove('locked');
-        document.body.classList.add('unlocked');
-        document.querySelector('.hero').style.display = 'none';
-        document.getElementById('c').style.display = 'none';
-        document.getElementById('content').classList.add('visible');
-        document.getElementById('siteNav').classList.add('visible');
-        window.scrollTo({ top: 0, behavior: 'instant' });
+        window.location.href = '?skip#about';
       } else {
         AstroCanvas.startTransition();
       }
