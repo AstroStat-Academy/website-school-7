@@ -74,6 +74,13 @@
       margin-top: 1.5rem;
       text-align: center;
     }
+    @media(max-width:600px){
+      .apply-page{padding:5rem 1.25rem 3rem}
+      .scale-group{flex-direction:column;align-items:stretch;gap:0.5rem}
+      .scale-label-end{max-width:100%;text-align:left;font-size:0.82rem}
+      .scale-options{justify-content:space-evenly;width:100%}
+      .radio-group{gap:0.35rem}
+    }
   </style>
 </head>
 <body>
@@ -289,7 +296,7 @@
     btn.textContent = 'Submitting…';
     btn.disabled = true;
 
-    fetch('https://script.google.com/macros/s/AKfycbzE5glgAe_VakzKkq6YbRgeO2ichvifuQMU4dZpV7EJj-S3MT1W2f7mt200l8Hv9Qi2/exec', {
+    fetch('https://script.google.com/macros/s/AKfycby4Uzn8f3zLsRuJBokYCxu5ohzmWI5gUEhpf1S97k-AdoZ9AEq-AKjTzi-4bUMyB_SCeg/exec', {
       method: 'POST',
       mode: 'no-cors',
       body: new FormData(form)

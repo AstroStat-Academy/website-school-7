@@ -258,3 +258,48 @@ details[open]>.join-summary::before{transform:rotate(90deg)}
 .footer-contact a:hover{color:rgba(255,255,255,0.8)}
 .footer-contact span{font-size:0.8rem;color:rgba(255,255,255,0.25)}
 .apply-footer .footer-meta{font-size:0.72rem;color:rgba(255,255,255,0.2);margin-top:2rem;text-align:center}
+
+/* ===== MOBILE FIXES ===== */
+@media(max-width:768px){
+
+  /* Section padding */
+  .sec{padding:3rem 1.5rem}
+
+  /* About */
+  .about-sidebar{flex-wrap:wrap}
+  .about-sidebar .info-card{flex:0 0 calc(50% - 0.5rem)}
+
+  /* Instructors */
+  .instructors-grid{grid-template-columns:repeat(2,1fr);gap:1rem}
+  .instructor-card h3{font-size:0.82rem}
+  .instructor-card .inst{font-size:0.68rem}
+
+  /* Legacy */
+  .legacy-timeline-row{flex-direction:column;gap:1rem}
+  .legacy-stats-aside{justify-content:center;flex-wrap:wrap;gap:1.5rem;flex-direction:row}
+
+  /* Worldsphere */
+  .worldsphere-frame{height:300px}
+
+  /* Sponsors */
+  .sponsor-card--organizer{width:100%}
+  .sponsors-row .sponsor-card{width:140px;flex:0 0 140px}
+
+  /* Venue gallery – disable zoom-on-hover */
+  .venue-gallery-item:hover{transform:none;z-index:1}
+
+  /* Contact modal */
+  .contact-modal-overlay{padding:0;align-items:flex-end}
+  .contact-modal{max-width:100%;border-radius:12px 12px 0 0}
+
+  /* Apply footer */
+  .apply-footer.sec{padding:3rem 1.5rem}
+  .footer-contact{gap:1.2rem}
+}
+
+@media(max-width:480px){
+  /* Instructors: single column on very small screens */
+  .instructors-grid{grid-template-columns:1fr}
+  /* About info cards: row of 3 on small screens */
+  .about-sidebar .info-card{flex:1;min-width:80px}
+}

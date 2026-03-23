@@ -37,8 +37,40 @@
     // ===== EXPLORE BUTTON =====
     document.getElementById('exploreBtn').addEventListener('click', function (e) {
       e.preventDefault();
-      AstroCanvas.startTransition();
+      if (window.innerWidth < 769) {
+        // Mobile: skip heavy canvas animation, reveal content directly
+        document.body.classList.remove('locked');
+        document.body.classList.add('unlocked');
+        document.querySelector('.hero').style.display = 'none';
+        document.getElementById('c').style.display = 'none';
+        document.getElementById('content').classList.add('visible');
+        document.getElementById('siteNav').classList.add('visible');
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      } else {
+        AstroCanvas.startTransition();
+      }
     });
+
+    // ===== HAMBURGER MENU =====
+    var hamburger = document.getElementById('navHamburger');
+    var navLinksMenu = document.querySelector('.nav-links');
+    if (hamburger && navLinksMenu) {
+      hamburger.addEventListener('click', function () {
+        var isOpen = navLinksMenu.classList.toggle('open');
+        hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        hamburger.innerHTML = isOpen
+          ? '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><line x1="2" y1="2" x2="16" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="2" x2="2" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+          : '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><line x1="2" y1="5" x2="16" y2="5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="9" x2="16" y2="9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="13" x2="16" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+      });
+      // Close menu when a nav link is clicked
+      navLinksMenu.querySelectorAll('a').forEach(function (a) {
+        a.addEventListener('click', function () {
+          navLinksMenu.classList.remove('open');
+          hamburger.setAttribute('aria-expanded', 'false');
+          hamburger.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><line x1="2" y1="5" x2="16" y2="5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="9" x2="16" y2="9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="13" x2="16" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+        });
+      });
+    }
 
     // ===== FOOTER DARK-MODE NAV =====
     const applyFooter = document.getElementById('apply-section');

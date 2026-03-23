@@ -9,6 +9,14 @@
   .snap-sec > .sec-inner{width:100%}
 }
 
+/* ===== MOBILE LAYOUT ===== */
+@media(max-width:768px){
+  .content-section.visible{overflow-y:visible;height:auto}
+  .snap-sec{min-height:auto;display:block}
+  .sec-inner{padding:0}
+  .sec-wide{padding:0}
+}
+
 /* ===== SHARED SECTION STYLES ===== */
 .sec{padding:5rem 2rem;width:100%;background:#fff}
 .sec-alt{background:#f8f9fb}

@@ -26,8 +26,19 @@
 .side-dots.on-dark .side-dot.active{background:rgba(255,255,255,0.7)}
 .side-dots.on-dark .side-dot:hover{background:rgba(255,255,255,0.5)}
 
+/* ===== HAMBURGER ===== */
+.nav-hamburger{display:none;background:none;border:none;cursor:pointer;padding:0.4rem;color:#0a0e18;line-height:1;transition:color 0.3s;flex-shrink:0}
+.site-nav.dark-mode .nav-hamburger{color:#fff}
+
 @media(max-width:768px){
   .side-dots{display:none}
-  .nav-links{display:none}
+  .nav-links{display:none;position:fixed;top:56px;left:0;right:0;flex-direction:column;gap:0;background:rgba(255,255,255,0.98);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,0,0,0.06);padding:0.5rem 0;z-index:99}
+  .nav-links.open{display:flex}
+  .nav-links li{width:100%}
+  .nav-links a{display:block;padding:0.75rem 2rem;font-size:0.9rem;border-bottom:1px solid rgba(0,0,0,0.04)}
+  .nav-links a:last-child{border-bottom:none}
+  .site-nav.dark-mode .nav-links{background:rgba(10,14,24,0.98);border-bottom-color:rgba(255,255,255,0.06)}
+  .site-nav.dark-mode .nav-links a{border-bottom-color:rgba(255,255,255,0.04)}
+  .nav-hamburger{display:flex;align-items:center;justify-content:center}
   .instructor-card .role{max-height:none;opacity:1}
 }
