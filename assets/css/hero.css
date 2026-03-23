@@ -45,6 +45,13 @@
 
 @media(max-width:768px){
   .hero{padding:1.5rem}
+  /* Skip long-delay animations on mobile — show content immediately */
+  .hero-logo,.hero-overline,.edition-info,.headline,.cta-row,.meta{animation:none;opacity:1}
+  .headline .word{animation:none;opacity:1}
+  .tagline{animation:none;opacity:1}
+  .tagline .tword{animation:none;opacity:1;color:rgba(255,255,255,0.65)}
+  .hero-sponsors{animation:none;opacity:1}
+  /* Layout */
   .meta{gap:1.2rem;flex-wrap:wrap;justify-content:center;bottom:5rem;left:50%;transform:translateX(-50%);width:90%;padding:0 1rem}
   .meta-value{font-size:1.1rem}
   .meta-label{font-size:0.6rem}
