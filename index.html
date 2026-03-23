@@ -18,6 +18,7 @@
 <body>
 
 <a href="#main-content" class="sr-only">Skip to content</a>
+<a href="?skip#about" class="hero-jump-link" id="jumpLink">Jump to info &rarr;</a>
 <canvas id="c" aria-hidden="true"></canvas>
 <canvas id="footer-c" aria-hidden="true" style="display:none"></canvas>
 <div class="white-flash" id="whiteFlash"></div>
@@ -558,6 +559,20 @@
   </div>
 </div>
 
+<script>
+(function(){
+  var link = document.getElementById('jumpLink');
+  var target = document.getElementById('about');
+  if(!link || !target) return;
+  var hero = document.getElementById('main-content');
+  var obs = new IntersectionObserver(function(entries){
+    var visible = entries[0].isIntersecting;
+    link.style.opacity = visible ? '' : '0';
+    link.style.pointerEvents = visible ? '' : 'none';
+  }, {threshold: 0.1});
+  obs.observe(hero);
+})();
+</script>
 <script src="assets/js/canvas_mouth.js"></script>
 <script src="assets/js/canvas_footer.js"></script>
 <script src="assets/js/main.js"></script>

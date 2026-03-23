@@ -52,16 +52,17 @@
     }
     .req { color: rgba(180,140,255,0.7); }
     .radio-group { display: flex; flex-direction: column; gap: 0.45rem; margin-top: 0.4rem; }
-    .radio-option { display: flex; align-items: center; gap: 0.55rem; font-size: 0.88rem; color: rgba(255,255,255,0.65); cursor: pointer; }
+    .radio-option { display: flex; align-items: center; gap: 0.55rem; font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 400; text-transform: none; letter-spacing: 0; color: rgba(255,255,255,0.65); cursor: pointer; }
     .radio-option input[type="radio"] { accent-color: rgba(180,140,255,0.8); width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; }
     .radio-option:hover { color: rgba(255,255,255,0.85); }
-    .scale-note { font-size: 0.75rem; color: rgba(255,255,255,0.3); margin: 0.2rem 0 0.6rem; }
-    .scale-group { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-    .scale-label-end { font-size: 0.75rem; color: rgba(255,255,255,0.35); line-height: 1.3; flex-shrink: 0; max-width: 130px; }
-    .scale-options { display: flex; gap: 0.6rem; align-items: center; }
+    .form-group select:invalid, .form-group select option[value=""] { color: rgba(255,255,255,0.25); }
+    .scale-note { font-size: 0.9rem; color: rgba(255,255,255,0.65); margin: 0.2rem 0 0.6rem; border-left: 3px solid rgba(255,255,255,0.2); padding-left: 0.75rem; }
+    .scale-group { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; width: 100%; }
+    .scale-label-end { font-size: 0.9rem; color: rgba(255,255,255,0.65); line-height: 1.3; flex-shrink: 0; max-width: 160px; font-style: italic; }
+    .scale-options { display: flex; align-items: center; flex: 1; justify-content: space-evenly; }
     .scale-option { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; cursor: pointer; }
     .scale-option input[type="radio"] { accent-color: rgba(180,140,255,0.8); width: 18px; height: 18px; cursor: pointer; }
-    .scale-option span { font-size: 0.72rem; color: rgba(255,255,255,0.4); }
+    .scale-option span { font-size: 0.9rem; color: rgba(255,255,255,0.65); }
     .apply-footer-info {
       margin-top: 3rem;
       text-align: center;
@@ -98,7 +99,7 @@
 
     <div style="background:rgba(255,255,255,0.04);border-top:2px solid rgba(124,111,205,0.35);border-radius:0 0 10px 10px;padding:0.8rem 1.3rem;margin-top:0.75rem;font-size:0.9rem;line-height:1.45;color:rgba(255,255,255,0.65);text-align:left"><span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#fff;display:block;margin-bottom:0.3rem">Registration Fee</span>We aim to keep the contibution as low as possible, strictly to cover essential costs, with instructors receiving no profit. Alas, a participation fee is required.<br><br>The rates are as follows:<ul style="margin:0.5rem 0 0.5rem 1.2rem;padding:0"><li>Students and PhD candidates: <strong style="color:rgba(255,255,255,0.85)">€250</strong></li><li>Postdoctoral researchers and above: <strong style="color:rgba(255,255,255,0.85)">€350</strong></li></ul>Selected applicants will receive payment instructions in the notification email. Registration is confirmed only upon receipt of the payment.</div>
 
-    <form class="apply-form" id="applyForm" onsubmit="handleSubmit(event)">
+    <form class="apply-form" id="applyForm" onsubmit="handleSubmit(event)" novalidate style="margin-top:2.5rem">
 
       <!-- Name -->
       <div class="form-row">
@@ -106,24 +107,30 @@
         <div class="form-group"><label for="lastName">Surname <span class="req">*</span></label><input type="text" id="lastName" name="entry.23336066" placeholder="Your last name" required></div>
       </div>
 
-      <!-- Email + Institution -->
+      <!-- Email + Confirm Email -->
       <div class="form-row">
         <div class="form-group"><label for="email">E-mail address <span class="req">*</span></label><input type="email" id="email" name="entry.312559857" placeholder="your@email.com" required></div>
-        <div class="form-group"><label for="institution">Host Institution <span class="req">*</span></label><input type="text" id="institution" name="entry.1524207113" placeholder="University / Institute" required></div>
+        <div class="form-group"><label for="emailConfirm">Confirm e-mail address <span class="req">*</span></label><input type="email" id="emailConfirm" placeholder="your@email.com" required></div>
+      </div>
+
+      <!-- Institution -->
+      <div class="form-row">
+        <div class="form-group full"><label for="institution">Host Institution <span class="req">*</span></label><input type="text" id="institution" name="entry.1524207113" placeholder="University / Institute" required></div>
       </div>
 
       <!-- Academic Status -->
       <div class="form-row">
         <div class="form-group full">
           <label>Academic Status <span class="req">*</span></label>
-          <div class="radio-group">
-            <label class="radio-option"><input type="radio" name="entry.997962685" value="Undergraduate"> Undergraduate</label>
-            <label class="radio-option"><input type="radio" name="entry.997962685" value="Masters Student"> Masters Student</label>
-            <label class="radio-option"><input type="radio" name="entry.997962685" value="PhD Student"> PhD Student</label>
-            <label class="radio-option"><input type="radio" name="entry.997962685" value="Postdoc"> Postdoc</label>
-            <label class="radio-option"><input type="radio" name="entry.997962685" value="Professor"> Professor</label>
-            <label class="radio-option"><input type="radio" name="entry.997962685" value="Other"> Other</label>
-          </div>
+          <select name="entry.997962685" required>
+            <option value="" disabled selected style="color:rgba(255,255,255,0.25)">Select an option</option>
+            <option value="Undergraduate">Undergraduate</option>
+            <option value="Masters Student">Masters Student</option>
+            <option value="PhD Student">PhD Student</option>
+            <option value="Postdoc">Postdoc</option>
+            <option value="Professor">Professor</option>
+            <option value="Other">Other</option>
+          </select>
         </div>
       </div>
 
@@ -131,15 +138,16 @@
       <div class="form-row">
         <div class="form-group full">
           <label for="motivation">Motivation Statement <span class="req">*</span></label>
-          <textarea id="motivation" name="entry.1115227041" rows="5" placeholder="Provide a concise statement explaining your motivation for attending the school and how it will support your academic or research work. The selection process prioritises demonstrated need, so this section should be treated as an important component of your application."></textarea>
+          <p class="form-hint" style="margin-bottom:0.6rem">Provide a concise statement explaining your motivation for attending the AstroStat School and how it will support your academic or research work. The selection process prioritizes demonstrated need, so this section should be treated as the most important component of your application.</p>
+          <textarea id="motivation" name="entry.1115227041" rows="5" placeholder="(MAX 850 characters, use ChatGPT at your own risk)" required></textarea>
         </div>
       </div>
 
       <!-- Statistics comfort -->
       <div class="form-row">
         <div class="form-group full">
-          <label>How comfortable are you with statistics?</label>
-          <p class="scale-note">Your answer will not affect your admission to the summer school.</p>
+          <label>How comfortable are you with statistics? <span class="req">*</span></label>
+          <p class="scale-note">This answer will not prejudice your admission to the school</p>
           <div class="scale-group">
             <span class="scale-label-end">Kolmogorov and Smirnov are brands of vodka</span>
             <div class="scale-options">
@@ -157,10 +165,10 @@
       <!-- ML comfort -->
       <div class="form-row">
         <div class="form-group full">
-          <label>How comfortable are you with machine learning?</label>
-          <p class="scale-note">Your answer will not affect your admission to the summer school.</p>
+          <label>How comfortable are you with machine learning? <span class="req">*</span></label>
+          <p class="scale-note">This answer will not prejudice your admission to the school</p>
           <div class="scale-group">
-            <span class="scale-label-end">I've seen Minority Report</span>
+            <span class="scale-label-end">That abomination should not exist</span>
             <div class="scale-options">
               <label class="scale-option"><input type="radio" name="entry.84965604" value="1"><span>1</span></label>
               <label class="scale-option"><input type="radio" name="entry.84965604" value="2"><span>2</span></label>
@@ -184,15 +192,16 @@
       <!-- How did you discover -->
       <div class="form-row">
         <div class="form-group full">
-          <label>How did you discover this Summer School?</label>
-          <div class="radio-group">
-            <label class="radio-option"><input type="radio" name="entry.1156303946" value="Canadian Astronomy Data Centre (CADC) meeting list"> Canadian Astronomy Data Centre (CADC) mailing list</label>
-            <label class="radio-option"><input type="radio" name="entry.1156303946" value="Mailing list/supervisor/collaborator"> Mailing list / supervisor / collaborator</label>
-            <label class="radio-option"><input type="radio" name="entry.1156303946" value="Previous attendants"> Previously attended</label>
-            <label class="radio-option"><input type="radio" name="entry.1156303946" value="Casually encountered the website/github repo"> Casually encountered the website / GitHub repo</label>
-            <label class="radio-option"><input type="radio" name="entry.1156303946" value="Social media"> Social media</label>
-            <label class="radio-option"><input type="radio" name="entry.1156303946" value="Gauss appeared in my dreams and suggested me to apply"> Gauss appeared in my dreams and suggested me to apply</label>
-          </div>
+          <label>How did you discover this School?</label>
+          <select name="entry.1156303946">
+            <option value="" disabled selected>Select an option</option>
+            <option value="Canadian Astronomy Data Centre (CADC) meeting list">Canadian Astronomy Data Centre (CADC) meeting list</option>
+            <option value="Mailing list/supervisor/collaborator">Mailing list/supervisor/collaborator</option>
+            <option value="Previous attendants">Previous attendants</option>
+            <option value="Casually encountered the website/github repo">Casually encountered the website/github repo</option>
+            <option value="Social media">Social media</option>
+            <option value="TikTok (yes, this can prejudice your admission to the school)">TikTok (yes, this can prejudice your admission to the school)</option>
+          </select>
         </div>
       </div>
 
@@ -206,16 +215,76 @@
   </div>
 </main>
 
-<div id="submitConfirm" style="display:none;text-align:center;padding:3rem 1rem">
-  <div style="font-size:2rem;margin-bottom:1rem">✓</div>
-  <h2 style="font-family:'Space Grotesk',sans-serif;color:rgba(255,255,255,0.9);margin-bottom:0.5rem">Application received!</h2>
-  <p style="color:rgba(255,255,255,0.45);font-size:0.9rem">Thank you for applying. We will be in touch in early May.</p>
+<div id="submitModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:2.5rem 2rem;max-width:600px;width:90%;text-align:center;backdrop-filter:blur(10px);">
+<h2 style="font-family:'Space Grotesk',sans-serif;color:rgba(255,255,255,0.9);margin-bottom:1.25rem">Your application has been submitted.</h2>
+    <p style="color:rgba(255,255,255,0.65);font-size:0.95rem;line-height:1.6;margin-bottom:0.75rem">You will not receive a confirmation email. This is expected.</p>
+    <p style="color:rgba(255,255,255,0.65);font-size:0.95rem;line-height:1.6">If you have not received a response by the first week of May, please contact us via email.</p>
+    <button onclick="window.location.href='index.html?skip#about'" style="margin-top:2rem;padding:0.6rem 1.8rem;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.25);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.9rem;cursor:pointer;">Close</button>
+  </div>
 </div>
 
 <script>
+  document.getElementById('applyForm').addEventListener('input', function(e) {
+    if (e.target.type === 'radio') {
+      var scaleGroup = e.target.closest('.scale-group');
+      if (scaleGroup) scaleGroup.classList.remove('field-error-group');
+    } else if (e.target.classList.contains('field-error') && e.target.value.trim()) {
+      e.target.classList.remove('field-error');
+      // If one email field is corrected, re-check match and clear the other if they now match
+      if (e.target.id === 'email' || e.target.id === 'emailConfirm') {
+        var emailEl = document.getElementById('email');
+        var emailConfirmEl = document.getElementById('emailConfirm');
+        if (emailEl.value === emailConfirmEl.value) {
+          emailEl.classList.remove('field-error');
+          emailConfirmEl.classList.remove('field-error');
+        }
+      }
+    }
+  });
+
   function handleSubmit(e) {
     e.preventDefault();
     var form = document.getElementById('applyForm');
+
+    // Validate required fields
+    var valid = true;
+    form.querySelectorAll('input[required], select[required], textarea[required]').forEach(function(el) {
+      el.classList.remove('field-error');
+      if (!el.value.trim() || (el.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value))) {
+        el.classList.add('field-error');
+        valid = false;
+      }
+    });
+
+    // Validate email match
+    var emailEl = document.getElementById('email');
+    var emailConfirmEl = document.getElementById('emailConfirm');
+    if (emailEl.value !== emailConfirmEl.value) {
+      emailEl.classList.add('field-error');
+      emailConfirmEl.classList.add('field-error');
+      valid = false;
+    }
+
+    // Validate required radio groups
+    ['entry.862831493', 'entry.84965604'].forEach(function(name) {
+      var group = form.querySelectorAll('input[name="' + name + '"]');
+      var checked = Array.from(group).some(function(r) { return r.checked; });
+      var scaleGroup = group[0].closest('.scale-group');
+      if (checked) {
+        scaleGroup.classList.remove('field-error-group');
+      } else {
+        scaleGroup.classList.add('field-error-group');
+        valid = false;
+      }
+    });
+
+    if (!valid) {
+      var first = form.querySelector('.field-error, .field-error-group');
+      if (first) first.scrollIntoView({behavior:'smooth', block:'center'});
+      return;
+    }
+
     var btn = form.querySelector('.btn-submit');
     btn.textContent = 'Submitting…';
     btn.disabled = true;
@@ -225,8 +294,10 @@
       mode: 'no-cors',
       body: new FormData(form)
     }).then(function() {
-      form.style.display = 'none';
-      document.getElementById('submitConfirm').style.display = 'block';
+      var modal = document.getElementById('submitModal');
+      modal.style.display = 'flex';
+      btn.textContent = 'Submit Application';
+      btn.disabled = false;
     }).catch(function() {
       btn.textContent = 'Submit Application';
       btn.disabled = false;
