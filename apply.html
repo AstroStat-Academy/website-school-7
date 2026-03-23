@@ -225,7 +225,7 @@
 <div id="submitModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;">
   <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:2.5rem 2rem;max-width:600px;width:90%;text-align:center;backdrop-filter:blur(10px);">
 <h2 style="font-family:'Space Grotesk',sans-serif;color:rgba(255,255,255,0.9);margin-bottom:1.25rem">Your application has been submitted.</h2>
-    <p style="color:rgba(255,255,255,0.65);font-size:0.95rem;line-height:1.6;margin-bottom:0.75rem">You will not receive a confirmation email. This is expected.</p>
+    <p style="color:rgba(255,255,255,0.65);font-size:0.95rem;line-height:1.6;margin-bottom:0.75rem">You will receive a confirmation email (please check your spam folder).</p>
     <p style="color:rgba(255,255,255,0.65);font-size:0.95rem;line-height:1.6">If you have not received a response by the first week of May, please contact us via email.</p>
     <button onclick="window.location.href='index.html?skip#about'" style="margin-top:2rem;padding:0.6rem 1.8rem;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.25);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.9rem;cursor:pointer;">Close</button>
   </div>
@@ -296,15 +296,13 @@
     btn.textContent = 'Submitting…';
     btn.disabled = true;
 
-    fetch('https://script.google.com/macros/s/AKfycby4Uzn8f3zLsRuJBokYCxu5ohzmWI5gUEhpf1S97k-AdoZ9AEq-AKjTzi-4bUMyB_SCeg/exec', {
+    fetch('https://script.google.com/macros/s/AKfycbxTbAPVCa2yDKgVzuaMKPwKBCwx0oPcMBgxEjEs3soWmSv6iymlm5QIG2o-sEA69NU/exec', {
       method: 'POST',
-      mode: 'no-cors',
       body: new FormData(form)
     }).then(function() {
-      var modal = document.getElementById('submitModal');
-      modal.style.display = 'flex';
       btn.textContent = 'Submit Application';
       btn.disabled = false;
+      document.getElementById('submitModal').style.display = 'flex';
     }).catch(function() {
       btn.textContent = 'Submit Application';
       btn.disabled = false;
