@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schedule — AstroStat School Rome 2026</title>
+  <link rel="icon" type="image/png" href="assets/images/school_logo/school_logo_white.png">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-J6RE02NFH3"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-J6RE02NFH3');
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/nav.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+
+  <style>
+    .schedule-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 6rem 2rem 4rem;
+    }
+    .schedule-page-inner {
+      width: 100%;
+      max-width: 1100px;
+    }
+    .schedule-page h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.92);
+      letter-spacing: -0.03em;
+      text-align: center;
+    }
+    .schedule-page h1::after {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 3px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.3), rgba(180,140,255,0.4));
+      border-radius: 2px;
+      margin: 0.8rem auto 0;
+      opacity: 0.5;
+    }
+    .schedule-page .subtitle {
+      font-size: 0.92rem;
+      color: rgba(255, 255, 255, 0.45);
+      margin-top: 0.8rem;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    /* ===== GRID ===== */
+    .schedule-grid {
+      margin-top: 2.5rem;
+      display: grid;
+      grid-template-columns: minmax(110px, 0.8fr) repeat(5, 1fr);
+      gap: 6px;
+    }
+    .sch-cell {
+      border-radius: 8px;
+      padding: 0.7rem 0.8rem;
+      font-size: 0.82rem;
+      line-height: 1.35;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .sch-day {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.85);
+      text-align: center;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .sch-day span {
+      display: block;
+      font-weight: 400;
+      font-size: 0.68rem;
+      letter-spacing: 0.05em;
+      color: rgba(255,255,255,0.4);
+      margin-top: 0.15rem;
+      text-transform: none;
+    }
+    .sch-label {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.45);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    .sch-topic {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      color: rgba(255,255,255,0.92);
+      text-align: center;
+      align-items: center;
+      border: 1px solid transparent;
+      position: relative;
+      overflow: hidden;
+      cursor: default;
+    }
+    .sch-teacher {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.4rem 0.6rem;
+      background: rgba(7,10,18,0.88);
+      backdrop-filter: blur(3px);
+      font-size: 0.74rem;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      color: rgba(255,255,255,0.9);
+      text-align: center;
+      line-height: 1.3;
+      opacity: 0;
+      transition: opacity 0.22s ease;
+      pointer-events: none;
+    }
+    .sch-topic:hover .sch-teacher { opacity: 1; }
+
+    /* Networking: expanding popover */
+    .sch-topic--net { overflow: visible; }
+    .sch-net-pop {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(0.55);
+      width: min(380px, 82vw);
+      background: rgba(12, 16, 28, 0.97);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 12px;
+      padding: 1.1rem 1.3rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.65);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 30;
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.75);
+      line-height: 1.55;
+      text-align: left;
+    }
+    .sch-topic--net:hover { z-index: 40; }
+    .sch-topic--net:hover .sch-net-pop {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .sch-net-pop--small {
+      width: auto;
+      white-space: nowrap;
+      text-align: center;
+      padding: 0.8rem 1.2rem;
+    }
+    .sch-net-teachers {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.92);
+      line-height: 1.4;
+      margin-bottom: 0.6rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+    }
+    .sch-net-optional {
+      margin-top: 0.6rem;
+      font-style: italic;
+      color: rgba(255,255,255,0.5);
+    }
+    .sch-time {
+      display: block;
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      font-size: 0.7rem;
+      letter-spacing: 0.03em;
+      text-transform: none;
+      color: rgba(255,255,255,0.32);
+      margin-top: 0.2rem;
+    }
+    .sch-empty { background: transparent; }
+    .sch-break {
+      grid-column: 2 / -1;
+      background: rgba(255,255,255,0.03);
+      border: 1px dashed rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.35);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      text-align: center;
+      align-items: center;
+      padding: 0.45rem;
+    }
+
+    /* topic color families (echoing the planning board) */
+    .c-stats   { background: rgba(60, 130, 245, 0.30); border-color: rgba(90, 155, 255, 0.40); }
+    .c-bayes   { background: rgba(235, 185, 40, 0.24); border-color: rgba(245, 200, 70, 0.40); }
+    .c-ml      { background: rgba(70, 195, 90, 0.26); border-color: rgba(95, 215, 115, 0.40); }
+    .c-dl      { background: rgba(230, 65, 60, 0.30); border-color: rgba(245, 95, 90, 0.42); }
+    .c-misc    { background: rgba(255, 255, 255, 0.10); border-color: rgba(255,255,255,0.18); }
+    .c-dinner  {
+      background: linear-gradient(135deg, rgba(180, 140, 255, 0.22), rgba(255, 180, 90, 0.18));
+      border-color: rgba(200, 170, 255, 0.4);
+      box-shadow: 0 0 18px rgba(160, 120, 255, 0.15);
+    }
+
+    /* ===== MOBILE: stack by day ===== */
+    @media (max-width: 760px) {
+      .schedule-page { padding: 5rem 1.25rem 3rem; }
+      .schedule-grid { display: none; }
+      .schedule-days-mobile { display: block; margin-top: 2rem; }
+      .sch-mob-day {
+        margin-bottom: 1.6rem;
+      }
+      .sch-mob-day h3 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: rgba(255,255,255,0.85);
+        border-bottom: 1px solid rgba(255,255,255,0.12);
+        padding-bottom: 0.4rem;
+        margin-bottom: 0.7rem;
+      }
+      .sch-mob-day h3 span { color: rgba(255,255,255,0.4); font-weight: 400; letter-spacing: 0.05em; text-transform: none; }
+      .sch-mob-row {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin-bottom: 0.45rem;
+      }
+      .sch-mob-session {
+        flex: 0 0 92px;
+        font-size: 0.62rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: rgba(255,255,255,0.4);
+      }
+      .sch-mob-topic {
+        flex: 1;
+        border-radius: 7px;
+        border: 1px solid transparent;
+        padding: 0.55rem 0.8rem;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: rgba(255,255,255,0.92);
+      }
+      .sch-mob-time {
+        display: block;
+        font-size: 0.62rem;
+        letter-spacing: 0.02em;
+        color: rgba(255,255,255,0.3);
+        margin-top: 0.1rem;
+      }
+      .sch-mob-teacher {
+        display: block;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.68rem;
+        font-weight: 400;
+        color: rgba(255,255,255,0.55);
+        margin-top: 0.15rem;
+      }
+      .sch-mob-netdesc {
+        display: block;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.7rem;
+        font-weight: 400;
+        color: rgba(255,255,255,0.6);
+        line-height: 1.5;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid rgba(255,255,255,0.1);
+      }
+      .sch-mob-netdesc em { color: rgba(255,255,255,0.45); }
+    }
+    @media (min-width: 761px) {
+      .schedule-days-mobile { display: none; }
+    }
+
+    .schedule-back {
+      margin-top: 2.5rem;
+      display: inline-block;
+      padding: 0.7rem 2rem;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      transition: background 0.25s, color 0.25s;
+    }
+    .schedule-back:hover {
+      background: rgba(255,255,255,0.14);
+      color: rgba(255,255,255,0.95);
+    }
+    .schedule-footer-meta {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.2);
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+    .schedule-actions { text-align: center; }
+    .schedule-actions .schedule-back { margin: 2.5rem 0.5rem 0; cursor: pointer; }
+
+    /* ===== PRINT (landscape PDF export) ===== */
+    @media print {
+      @page { size: A4 landscape; margin: 0; }
+      body { background: #fff !important; }
+      .site-nav, .schedule-actions, .schedule-days-mobile, .schedule-footer-meta { display: none !important; }
+      .schedule-page { padding: 10mm 12mm; min-height: auto; }
+      .schedule-page-inner { max-width: none; }
+      .schedule-page h1 { color: #0a0e18; font-size: 1.6rem; }
+      .schedule-page .subtitle { color: rgba(10,14,24,0.55); margin-top: 0.3rem; }
+      .schedule-grid { display: grid !important; margin-top: 1.2rem; gap: 4px;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .sch-cell { padding: 0.45rem 0.5rem; font-size: 0.72rem; }
+      .sch-day { color: #0a0e18; background: rgba(10,14,24,0.06); border-color: rgba(10,14,24,0.15); }
+      .sch-day span { color: rgba(10,14,24,0.5); }
+      .sch-label { color: rgba(10,14,24,0.6); }
+      .sch-time { color: rgba(10,14,24,0.45); }
+      .sch-topic { color: #0a0e18; overflow: visible; }
+      .sch-break { color: rgba(10,14,24,0.5); background: rgba(10,14,24,0.03); border-color: rgba(10,14,24,0.2); }
+      /* hide teacher names and hover popovers */
+      .sch-teacher, .sch-net-pop { display: none; }
+      .c-misc { background: rgba(10,14,24,0.07); border-color: rgba(10,14,24,0.18); }
+      .c-dinner { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="site-nav visible dark-mode" id="siteNav">
+  <div class="nav-brand">
+    <img src="assets/images/school_logo/school_logo_white.png" alt="AstroStat School logo" style="height:28px;width:auto">
+    AstroStat School
+  </div>
+  <a href="index.html?skip#schedule" class="nav-apply">&#8592; Back to site</a>
+</nav>
+
+<main class="schedule-page">
+  <div class="schedule-page-inner">
+
+    <h1>Schedule</h1>
+    <p class="subtitle">AstroStat School &middot; Rome &middot; 27&ndash;31 July 2026</p>
+
+    <!-- ===== DESKTOP GRID ===== -->
+    <div class="schedule-grid">
+      <div class="sch-cell sch-empty"></div>
+      <div class="sch-cell sch-day">Monday<span>27 July</span></div>
+      <div class="sch-cell sch-day">Tuesday<span>28 July</span></div>
+      <div class="sch-cell sch-day">Wednesday<span>29 July</span></div>
+      <div class="sch-cell sch-day">Thursday<span>30 July</span></div>
+      <div class="sch-cell sch-day">Friday<span>31 July</span></div>
+
+      <div class="sch-cell sch-label">Morning<span class="sch-time">9:30 &ndash; 11:00</span></div>
+      <div class="sch-cell sch-topic c-stats">Classical Statistics<span class="sch-teacher">Konstantinos Kovlakas</span></div>
+      <div class="sch-cell sch-topic c-bayes">Bayesian I<span class="sch-teacher">Giorgos Vernardos</span></div>
+      <div class="sch-cell sch-topic c-bayes">Gaussian Processes<span class="sch-teacher">Paolo Bonfini</span></div>
+      <div class="sch-cell sch-topic c-ml">ML Best Practices<span class="sch-teacher">Grigoris Maravelias</span></div>
+      <div class="sch-cell sch-topic c-bayes">SBI<span class="sch-teacher">Giorgos Vernardos</span></div>
+
+      <div class="sch-cell sch-label"></div>
+      <div class="sch-cell sch-break">Coffee break &middot; 15 min</div>
+
+      <div class="sch-cell sch-label">Morning<span class="sch-time">11:15 &ndash; 12:45</span></div>
+      <div class="sch-cell sch-topic c-stats">Hypothesis Testing<span class="sch-teacher">Paolo Bonfini</span></div>
+      <div class="sch-cell sch-topic c-bayes">Bayesian II<span class="sch-teacher">Giorgos Vernardos</span></div>
+      <div class="sch-cell sch-topic c-ml">Time Series<span class="sch-teacher">Nikolas Vasilas</span></div>
+      <div class="sch-cell sch-topic c-dl">DL Intro + Regression<span class="sch-teacher">Grigoris Maravelias</span></div>
+      <div class="sch-cell sch-topic c-dl">Diffusion Models<span class="sch-teacher">Grigoris Maravelias</span></div>
+
+      <div class="sch-cell sch-label"></div>
+      <div class="sch-cell sch-break">Lunch break &middot; 1 h 30 min</div>
+
+      <div class="sch-cell sch-label">Afternoon<span class="sch-time">14:15 &ndash; 15:45</span></div>
+      <div class="sch-cell sch-topic c-stats">Maximum Likelihood<span class="sch-teacher">Konstantinos Kovlakas</span></div>
+      <div class="sch-cell sch-topic c-bayes">MCMC<span class="sch-teacher">Konstantinos Kovlakas</span></div>
+      <div class="sch-cell sch-topic c-misc sch-topic--net">Networking
+        <div class="sch-net-pop">
+          <div class="sch-net-teachers">Erika Korb<br>Konstantinos Kovlakas</div>
+          <p>In this session, our lecturers will share real-life professional experiences outside academia. Students will have the opportunity to learn about expectations in the broader job market, how to apply their data science skills in different professional contexts, which requirements are commonly expected, and how to improve their chances of application success.</p>
+          <p class="sch-net-optional">Attendance to this session is optional.</p>
+        </div>
+      </div>
+      <div class="sch-cell sch-topic c-dl">GPU<span class="sch-teacher">Giorgos Vernardos</span></div>
+      <div class="sch-cell sch-topic c-dl">Intro to Agents<span class="sch-teacher">Paolo Bonfini</span></div>
+
+      <div class="sch-cell sch-label"></div>
+      <div class="sch-cell sch-break" style="grid-column:2/4">Coffee break &middot; 15 min</div>
+      <div class="sch-cell sch-empty"></div>
+      <div class="sch-cell sch-break" style="grid-column:5/7">Coffee break &middot; 15 min</div>
+
+      <div class="sch-cell sch-label">Afternoon<span class="sch-time">16:00 &ndash; 17:30</span></div>
+      <div class="sch-cell sch-topic c-ml">ML Intro + Clustering<span class="sch-teacher">Nikolas Vasilas</span></div>
+      <div class="sch-cell sch-topic c-ml">ML Classification<span class="sch-teacher">Nikolas Vasilas</span></div>
+      <div class="sch-cell sch-empty"></div>
+      <div class="sch-cell sch-topic c-dl">NN Explainability<span class="sch-teacher">Arnab Lahiry</span></div>
+      <div class="sch-cell sch-topic c-misc">Closing Remarks</div>
+
+      <div class="sch-cell sch-label">Evening</div>
+      <div class="sch-cell sch-empty"></div>
+      <div class="sch-cell sch-empty"></div>
+      <div class="sch-cell sch-topic c-dinner sch-topic--net">Social Dinner
+        <div class="sch-net-pop sch-net-pop--small">
+          <p>Details will be communicated.</p>
+        </div>
+      </div>
+      <div class="sch-cell sch-empty"></div>
+      <div class="sch-cell sch-empty"></div>
+    </div>
+
+    <!-- ===== MOBILE (stacked by day) ===== -->
+    <div class="schedule-days-mobile">
+
+      <div class="sch-mob-day">
+        <h3>Monday <span>&middot; 27 July</span></h3>
+        <div class="sch-mob-row"><div class="sch-mob-session">Morning<span class="sch-mob-time">9:30&ndash;11:00</span></div><div class="sch-mob-topic c-stats">Classical Statistics<span class="sch-mob-teacher">Konstantinos Kovlakas</span></div></div>
+        <div class="sch-mob-row"><div class="sch-mob-session">Morning<span class="sch-mob-time">11:15&ndash;12:45</span></div><div class="sch-mob-topic c-stats">Hypothesis Testing<span class="sch-mob-teacher">Paolo Bonfini</span></div></div>
+        <div class="sch-mob-row"><div class="sch-mob-session">Afternoon<span class="sch-mob-time">14:15&ndash;15:45</span></div><div class="sch-mob-topic c-stats">Maximum Likelihood<span class="sch-mob-teacher">Konstantinos Kovlakas</span></div></div>
+        <div class="sch-mob-row"><div class="sch-mob-session">Afternoon<span class="sch-mob-time">16:00&ndash;17:30</span></div><div class="sch-mob-topic c-ml">ML Intro + Clustering<span class="sch-mob-teacher">Nikolas Vasilas</span></div></div>
+      </div>
+
+      <div class="sch-mob-day">
+        <h3>Tuesday <span>&middot; 28 July</span></h3>
+        <div class="sch-mob-row"><div class="sch-mob-session">Morning<span class="sch-mob-time">9:30&ndash;11:00</span></div><div class="sch-mob-topic c-bayes">Bayesian I<span class="sch-mob-teacher">Giorgos Vernardos</span></div></div>
+        <div class="sch-mob-row"><div class="sch-mob-session">Morning<span class="sch-mob-time">11:15&ndash;12:45</span></div><div class="sch-mob-topic c-bayes">Bayesian II<span class="sch-mob-teacher">Giorgos Vernardos</span></div></div>
+        <div class="sch-mob-row"><div class="sch-mob-session">Afternoon<span class="sch-mob-time">14:15&ndash;15:45</span></div><div class="sch-mob-topic c-bayes">MCMC<span class="sch-mob-teacher">Konstantinos Kovlakas</span></div></div>
+        <div class="sch-mob-row"><div class="sch-mob-session">Afternoon<span class="sch-mob-time">16:00&ndash;17:30</span></div><div class="sch-mob-topic c-ml">ML Classification<span class="sch-mob-teacher">Nikolas Vasilas</span></div></div>
+      </div>
+
+      <div class="sch-mob-day">
+        <h3>Wednesday <span>&middot; 29 July</span></h3>
+        <div class="sch-mob-row"><div class="sch-mob-session">Morning<span class="sch-mob-time">9:30&ndash;11:00</span></div><div class="sch-mob-topic c-bayes">Gaussian Processes<span class="sch-mob-teacher">Paolo Bonfini</span></div></div>
+        <div class="sch-mob-row"><div class="sch-mob-session">Morning<span class="sch-mob-time">11:15&ndash;12:45</span></div><div class="sch-mob-topic c-ml">Time Series<span class="sch-mob-teacher">Nikolas Vasilas</span></div></div>
+        <div class="sch-mob-row"><div class="sch-mob-session">Afternoon<span class="sch-mob-time">14:15&ndash;15:45</span></div><div class="sch-mob-topic c-misc">Networking<span class="sch-mob-teacher">Erika Korb<br>Konstantinos Kovlakas</span><span class="sch-mob-netdesc">In this session, our lecturers will share real-life professional experiences outside academia. Students will have the opportunity to learn about expectations in the broader job market, how to apply their data science skills in different professional contexts, which requirements are commonly expected, and how to improve their chances of application success.<br><em>Attendance to this session is optional.</em></span></div></div>
+        <div class="sch-mob-row"><div class="sch-mob-session">Evening</div><div class="sch-mob-topic c-dinner">Social Dinner<span class="sch-mob-teacher">Details will be communicated.</span></div></div>
+      </div>
+
+      <div class="sch-mob-day">
+        <h3>Thursday <span>&middot; 30 July</span></h3>
+        <div class="sch-mob-row"><div class="sch-mob-session">Morning<span class="sch-mob-time">9:30&ndash;11:00</span></div><div class="sch-mob-topic c-ml">ML Best Practices<span class="sch-mob-teacher">Grigoris Maravelias</span></div></div>
+        <div class="sch-mob-row"><div class="sch-mob-session">Morning<span class="sch-mob-time">11:15&ndash;12:45</span></div><div class="sch-mob-topic c-dl">DL Intro + Regression<span class="sch-mob-teacher">Grigoris Maravelias</span></div></div>
+        <div class="sch-mob-row"><div class="sch-mob-session">Afternoon<span class="sch-mob-time">14:15&ndash;15:45</span></div><div class="sch-mob-topic c-dl">GPU<span class="sch-mob-teacher">Giorgos Vernardos</span></div></div>
+        <div class="sch-mob-row"><div class="sch-mob-session">Afternoon<span class="sch-mob-time">16:00&ndash;17:30</span></div><div class="sch-mob-topic c-dl">NN Explainability<span class="sch-mob-teacher">Arnab Lahiry</span></div></div>
+      </div>
+
+      <div class="sch-mob-day">
+        <h3>Friday <span>&middot; 31 July</span></h3>
+        <div class="sch-mob-row"><div class="sch-mob-session">Morning<span class="sch-mob-time">9:30&ndash;11:00</span></div><div class="sch-mob-topic c-bayes">SBI<span class="sch-mob-teacher">Giorgos Vernardos</span></div></div>
+        <div class="sch-mob-row"><div class="sch-mob-session">Morning<span class="sch-mob-time">11:15&ndash;12:45</span></div><div class="sch-mob-topic c-dl">Diffusion Models<span class="sch-mob-teacher">Grigoris Maravelias</span></div></div>
+        <div class="sch-mob-row"><div class="sch-mob-session">Afternoon<span class="sch-mob-time">14:15&ndash;15:45</span></div><div class="sch-mob-topic c-dl">Intro to Agents<span class="sch-mob-teacher">Paolo Bonfini</span></div></div>
+        <div class="sch-mob-row"><div class="sch-mob-session">Afternoon<span class="sch-mob-time">16:00&ndash;17:30</span></div><div class="sch-mob-topic c-misc">Closing Remarks</div></div>
+      </div>
+
+    </div>
+
+
+    <div class="schedule-actions">
+      <a href="index.html?skip#schedule" class="schedule-back">&#8592; Back to site</a>
+      <a href="#" class="schedule-back" onclick="window.print();return false;">Export as PDF &#8595;</a>
+    </div>
+
+    <div class="schedule-footer-meta">AstroStatistics School &copy; 2026.</div>
+
+  </div>
+</main>
+
+</body>
+</html>

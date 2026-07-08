@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Fetch papers that acknowledged the Summer School for Astrostatistics in Crete
-from NASA ADS and update the acknowledgements section in index.html.
+Fetch papers that acknowledged the AstroStat Academy or the Summer School
+for Astrostatistics in Crete from NASA ADS and update the acknowledgements
+section in index.html.
 
 Usage:
     python fetch_ack_papers.py
@@ -13,7 +14,8 @@ import urllib.request
 import urllib.parse
 
 ADS_TOKEN = "HU13ZGGhcGMy5wFQS9AFeW2y0FFQcQ4eDioCQAyT"
-QUERY     = 'full:"Summer School for Astrostatistics in Crete"'
+QUERY     = ('full:"We wish to thank the AstroStat Academy" '
+             'OR full:"Summer School for Astrostatistics in Crete"')
 ADS_BASE  = "https://ui.adsabs.harvard.edu/abs/"
 
 def fetch_papers():
