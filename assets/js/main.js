@@ -150,6 +150,31 @@
       legacyStatsObs.observe(legacySection);
     }
 
+    // ===== ANIMATED COUNTER (acknowledging papers) =====
+    let ackCountDone = false;
+    const ackCount = document.getElementById('ackCount');
+    if (ackCount) {
+      const ackCountObs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting && !ackCountDone) {
+            ackCountDone = true;
+            const el = ackCount.querySelector('.ack-count-number');
+            const target = parseInt(el.dataset.target);
+            const duration = 1500;
+            const start = performance.now();
+            function tick(now) {
+              const p = Math.min((now - start) / duration, 1);
+              const eased = 1 - Math.pow(1 - p, 3);
+              el.textContent = Math.round(target * eased);
+              if (p < 1) requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+          }
+        });
+      }, { threshold: 0.5 });
+      ackCountObs.observe(ackCount);
+    }
+
     // ===== SIDE NAVIGATION DOTS =====
     const sections      = document.querySelectorAll('.content-section .snap-sec');
     const dotsContainer = document.getElementById('sideDots');

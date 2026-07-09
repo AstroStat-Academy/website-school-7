@@ -148,8 +148,10 @@ details[open]>.join-summary::before{transform:rotate(90deg)}
 .ack-outro{font-size:0.95rem;line-height:1.75;color:rgba(10,14,24,0.6);text-align:center}
 .ack-link{color:#2a1c5a;text-decoration:none;font-weight:600}
 .ack-link:hover{text-decoration:underline}
+.ack-count{text-align:center;margin:2.2rem 0 1.8rem}
+.ack-count-number{font-family:'Space Grotesk',sans-serif;font-size:3.2rem;font-weight:700;line-height:1;background:linear-gradient(135deg,#0a0e18,#2a1c5a);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ack-count-label{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.15em;color:rgba(10,14,24,0.4);margin-top:0.4rem}
 .ack-papers{margin-top:1rem;padding-top:0}
-.ack-papers-title{font-family:'Space Grotesk',sans-serif;font-size:0.75rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:rgba(10,14,24,0.65);margin-bottom:1.5rem}
 .ack-papers-ticker{width:100%;overflow:hidden;mask-image:linear-gradient(90deg,transparent,black 6%,black 94%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,black 6%,black 94%,transparent)}
 .ack-papers-track{display:flex;align-items:stretch;gap:1rem;min-width:max-content;animation:ack-papers-scroll 70s linear infinite}
 .ack-papers-track:hover{animation-play-state:paused}

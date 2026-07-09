@@ -70,32 +70,34 @@ def build_track_html(docs):
         lines.append(render_card(doc, aria_hidden=True))
     return "\n".join(lines)
 
-def update_html(track_html):
+def update_html(track_html, count):
     with open("index.html", "r", encoding="utf-8") as f:
         content = f.read()
+    original = content
 
-    pattern = r'(<div class="ack-papers-track">).*?(</div>\s*</div>\s*</div>\s*</div>\s*<!-- SPONSORS -->)'
-    replacement = (
-        '<div class="ack-papers-track">\n'
-        + track_html
-        + '\n          </div>\n        </div>\n      </div>\n    </div>\n  </section>\n\n  <!-- SPONSORS -->'
+    content, n_count = re.subn(
+        r'(<div class="ack-count-number" data-target=")\d+(")',
+        rf'\g<1>{count}\g<2>',
+        content,
     )
+    if n_count == 0:
+        print("WARNING: ack-count-number not found — paper count not updated.")
 
-    # More targeted: replace content between track open and closing </div> of ticker
-    pattern = r'(<div class="ack-papers-track">)(.*?)(</div>\s*</div>(\s*</div>\s*</div>\s*<!-- SPONSORS -->))'
-    new_content = re.sub(
+    content, n_track = re.subn(
         r'(<div class="ack-papers-track">).*?(</div>\n        </div>\n      </div>\n    </div>\n  </section>)',
         f'<div class="ack-papers-track">\n{track_html}\n          </div>\n        </div>\n      </div>\n    </div>\n  </section>',
         content,
         flags=re.DOTALL,
     )
+    if n_track == 0:
+        print("WARNING: ack-papers-track not found — paper list not updated.")
 
-    if new_content == content:
-        print("WARNING: pattern not matched — index.html was not updated.")
+    if content == original:
+        print("index.html already up to date.")
         return
 
     with open("index.html", "w", encoding="utf-8") as f:
-        f.write(new_content)
+        f.write(content)
     print("index.html updated successfully.")
 
 def main():
@@ -103,7 +105,7 @@ def main():
     docs = fetch_papers()
     print(f"Found {len(docs)} papers.")
     track_html = build_track_html(docs)
-    update_html(track_html)
+    update_html(track_html, len(docs))
 
 if __name__ == "__main__":
     main()
